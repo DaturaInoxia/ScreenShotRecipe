@@ -1,0 +1,132 @@
+@page "/recipe/{RecipeId:guid}"
+@using ScreenShotRecipe.Application.Contracts.Dtos
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+  @if (isLoading)
+  {
+    <p><em>Loading recipe...</em></p>
+  }
+  else if (recipe == null)
+  {
+    <div class="alert alert-warning">Recipe not found.</div>
+    <a href="/recipes" class="btn btn-secondary">Back to Recipes</a>
+  }
+  else
+  {
+    <h1>@recipe.Title</h1>
+    <a href="/recipes" class="btn btn-secondary mb-3">Back to Recipes</a>
+
+    @if (!string.IsNullOrEmpty(recipe.Notes))
+    {
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Notes</h5>
+          <p class="card-text">@recipe.Notes</p>
+        </div>
+      </div>
+    }
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>Ingredients (@recipe.Ingredients.Count)</h5>
+          </div>
+          <div class="card-body">
+            @if (recipe.Ingredients.Count == 0)
+            {
+              <p><em>No ingredients found.</em></p>
+            }
+            else
+            {
+              <ul class="list-group list-group-flush">
+                @foreach (var ingredient in recipe.Ingredients)
+                {
+                  <li class="list-group-item">
+                    @if (!string.IsNullOrEmpty(ingredient.Name))
+                    {
+                      <strong>@ingredient.Name</strong>
+                      @if (!string.IsNullOrEmpty(ingredient.Quantity) || !string.IsNullOrEmpty(ingredient.Unit))
+                      {
+                        <span> — @ingredient.Quantity @ingredient.Unit</span>
+                      }
+                    }
+                    else
+                    {
+                      <em>@ingredient.RawText</em>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5>Steps (@recipe.Steps.Count)</h5>
+          </div>
+          <div class="card-body">
+            @if (recipe.Steps.Count == 0)
+            {
+              <p><em>No steps found.</em></p>
+            }
+            else
+            {
+              <ol>
+                @foreach (var step in recipe.Steps.OrderBy(s => s.Ordinal))
+                {
+                  <li>@step.Text</li>
+                }
+              </ol>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (recipe.Tags.Count > 0)
+    {
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5>Tags</h5>
+        </div>
+        <div class="card-body">
+          @foreach (var tag in recipe.Tags)
+          {
+            <span class="badge badge-secondary mr-2">@tag</span>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+@code {
+  [Parameter]
+  public Guid RecipeId { get; set; }
+
+  private RecipeDto? recipe = null;
+  private bool isLoading = true;
+
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      recipe = await Http.GetFromJsonAsync<RecipeDto>($"api/recipes/{RecipeId}");
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error loading recipe: {ex.Message}");
+      recipe = null;
+    }
+    finally
+    {
+      isLoading = false;
+    }
+  }
+}

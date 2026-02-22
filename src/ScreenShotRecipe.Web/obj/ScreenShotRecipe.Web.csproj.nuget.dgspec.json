@@ -1,0 +1,350 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\ScreenShotRecipe.Web.csproj": {}
+  },
+  "projects": {
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj",
+        "projectName": "ScreenShotRecipe.Application.Contracts",
+        "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj",
+        "packagesPath": "C:\\Users\\kenac\\.nuget\\packages\\",
+        "outputPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kenac\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\ScreenShotRecipe.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\ScreenShotRecipe.Application.csproj",
+        "projectName": "ScreenShotRecipe.Application",
+        "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\ScreenShotRecipe.Application.csproj",
+        "packagesPath": "C:\\Users\\kenac\\.nuget\\packages\\",
+        "outputPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kenac\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj"
+              },
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj",
+        "projectName": "ScreenShotRecipe.Domain",
+        "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj",
+        "packagesPath": "C:\\Users\\kenac\\.nuget\\packages\\",
+        "outputPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kenac\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\ScreenShotRecipe.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\ScreenShotRecipe.Infrastructure.csproj",
+        "projectName": "ScreenShotRecipe.Infrastructure",
+        "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\ScreenShotRecipe.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\kenac\\.nuget\\packages\\",
+        "outputPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kenac\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\ScreenShotRecipe.Web.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\ScreenShotRecipe.Web.csproj",
+        "projectName": "ScreenShotRecipe.Web",
+        "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\ScreenShotRecipe.Web.csproj",
+        "packagesPath": "C:\\Users\\kenac\\.nuget\\packages\\",
+        "outputPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kenac\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application.Contracts\\ScreenShotRecipe.Application.Contracts.csproj"
+              },
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\ScreenShotRecipe.Application.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Application\\ScreenShotRecipe.Application.csproj"
+              },
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Domain\\ScreenShotRecipe.Domain.csproj"
+              },
+              "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\ScreenShotRecipe.Infrastructure.csproj": {
+                "projectPath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Infrastructure\\ScreenShotRecipe.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.Components.Web": {
+              "target": "Package",
+              "version": "[9.0.0-rc.1.23456, )"
+            },
+            "Microsoft.AspNetCore.Components.WebAssembly.Server": {
+              "target": "Package",
+              "version": "[9.0.0-rc.1.23456, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

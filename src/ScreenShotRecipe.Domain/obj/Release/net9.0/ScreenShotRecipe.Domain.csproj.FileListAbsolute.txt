@@ -1,0 +1,11 @@
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\bin\Release\net9.0\ScreenShotRecipe.Domain.deps.json
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\bin\Release\net9.0\ScreenShotRecipe.Domain.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\bin\Release\net9.0\ScreenShotRecipe.Domain.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.AssemblyInfoInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.AssemblyInfo.cs
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\refint\ScreenShotRecipe.Domain.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ScreenShotRecipe.Domain.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Release\net9.0\ref\ScreenShotRecipe.Domain.dll

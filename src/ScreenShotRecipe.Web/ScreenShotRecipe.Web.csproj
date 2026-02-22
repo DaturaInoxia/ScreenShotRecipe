@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScreenShotRecipe.Application\ScreenShotRecipe.Application.csproj" />
+    <ProjectReference Include="..\ScreenShotRecipe.Application.Contracts\ScreenShotRecipe.Application.Contracts.csproj" />
+    <ProjectReference Include="..\ScreenShotRecipe.Domain\ScreenShotRecipe.Domain.csproj" />
+    <ProjectReference Include="..\ScreenShotRecipe.Infrastructure\ScreenShotRecipe.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0-rc.1.23456" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0-rc.1.23456" />
+  </ItemGroup>
+
+</Project>

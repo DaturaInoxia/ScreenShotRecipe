@@ -1,0 +1,140 @@
+@page "/import"
+@using ScreenShotRecipe.Application.Contracts.Dtos
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json
+@using System.Text.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+  <h1>Import Recipe from Images</h1>
+  <p>Select multiple image files (screenshots or photos of your recipe) and click Import.</p>
+
+  <div class="form-group">
+    <label for="fileInput">Select Images:</label>
+    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="@HandleFileSelected" disabled="@isLoading" />
+  </div>
+
+  <div class="form-group">
+    <button class="btn btn-primary" @onclick="HandleImport" disabled="@(isLoading || selectedFiles.Count == 0)">
+      @(isLoading ? "Importing..." : "Import Recipe")
+    </button>
+  </div>
+
+  @if (selectedFiles.Count > 0)
+  {
+    <p>Selected files: @selectedFiles.Count</p>
+  }
+
+  @if (!string.IsNullOrEmpty(message))
+  {
+    <div class="alert alert-@(isError ? "danger" : "success")" role="alert">
+      @message
+    </div>
+  }
+
+  @if (importedRecipe != null)
+  {
+    <div class="alert alert-success mt-3">
+      <h5>Recipe Imported Successfully!</h5>
+      <p><strong>Title:</strong> @importedRecipe.Title</p>
+      <p><strong>Ingredients:</strong> @importedRecipe.Ingredients.Count</p>
+      <p><strong>Steps:</strong> @importedRecipe.Steps.Count</p>
+      <a href="/recipe/@importedRecipe.Id" class="btn btn-sm btn-info">View Recipe</a>
+      <a href="/recipes" class="btn btn-sm btn-secondary">Back to List</a>
+    </div>
+  }
+</div>
+
+@code {
+  private List<(byte[] Bytes, string FileName)> selectedFiles = new();
+  private bool isLoading = false;
+  private string message = string.Empty;
+  private bool isError = false;
+  private RecipeDto? importedRecipe = null;
+
+  private async Task HandleFileSelected(InputFileChangeEventArgs e)
+  {
+    selectedFiles.Clear();
+    message = string.Empty;
+    isError = false;
+
+    try
+    {
+      foreach (var file in e.GetMultipleFiles())
+      {
+        // Read file into memory immediately while the stream is valid
+        using var stream = file.OpenReadStream(maxAllowedSize: 5_000_000);
+        using var ms = new System.IO.MemoryStream();
+        await stream.CopyToAsync(ms);
+        selectedFiles.Add((ms.ToArray(), file.Name));
+      }
+      message = $"Selected {selectedFiles.Count} file(s)";
+    }
+    catch (Exception ex)
+    {
+      message = $"Error loading files: {ex.Message}";
+      isError = true;
+      selectedFiles.Clear();
+    }
+    StateHasChanged();
+  }
+
+  private async Task HandleImport()
+  {
+    if (selectedFiles.Count == 0)
+    {
+      message = "Please select at least one image.";
+      isError = true;
+      StateHasChanged();
+      return;
+    }
+
+    isLoading = true;
+    message = string.Empty;
+    isError = false;
+    StateHasChanged();
+
+    try
+    {
+      var form = new MultipartFormDataContent();
+      foreach (var (bytes, fileName) in selectedFiles)
+      {
+        var byteContent = new ByteArrayContent(bytes);
+        form.Add(byteContent, "files", fileName);
+      }
+
+      Console.WriteLine($"Sending {selectedFiles.Count} files to /api/import...");
+      var response = await Http.PostAsync("api/import", form);
+      Console.WriteLine($"Response status: {response.StatusCode}");
+      
+      if (response.IsSuccessStatusCode)
+      {
+        var content = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response content: {content}");
+        importedRecipe = JsonSerializer.Deserialize<RecipeDto>(content, 
+          new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        message = "Recipe imported successfully!";
+        selectedFiles.Clear();
+      }
+      else
+      {
+        var errorContent = await response.Content.ReadAsStringAsync();
+        message = $"Failed to import recipe: {response.StatusCode} - {errorContent}";
+        isError = true;
+        Console.WriteLine($"Error: {message}");
+      }
+    }
+    catch (Exception ex)
+    {
+      message = $"Error: {ex.Message}";
+      isError = true;
+      Console.WriteLine($"Exception: {ex}");
+    }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+}

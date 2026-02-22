@@ -1,0 +1,15 @@
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\bin\Debug\net9.0\ScreenShotRecipe.Infrastructure.deps.json
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\bin\Debug\net9.0\ScreenShotRecipe.Infrastructure.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\bin\Debug\net9.0\ScreenShotRecipe.Infrastructure.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\bin\Debug\net9.0\ScreenShotRecipe.Domain.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\bin\Debug\net9.0\ScreenShotRecipe.Domain.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.csproj.AssemblyReference.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.AssemblyInfoInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.AssemblyInfo.cs
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenSh.D1125767.Up2Date
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\refint\ScreenShotRecipe.Infrastructure.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ScreenShotRecipe.Infrastructure.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Infrastructure\obj\Debug\net9.0\ref\ScreenShotRecipe.Infrastructure.dll

@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  screenshotrecipe:
+    build: .
+    volumes:
+      - ./data:/data
+    ports:
+      - "8080:80"

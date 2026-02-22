@@ -1,0 +1,55 @@
+@page "/recipes"
+@using ScreenShotRecipe.Application.Contracts.Dtos
+@inject HttpClient Http
+
+<div class="container mt-4">
+  <h1>Recipes</h1>
+  <p>
+    <a href="/import" class="btn btn-primary">Import Recipe</a>
+  </p>
+
+  @if (recipes == null)
+  {
+    <p>Loading recipes...</p>
+  }
+  else if (recipes.Count == 0)
+  {
+    <p>No recipes yet. <a href="/import">Upload some images to create a recipe.</a></p>
+  }
+  else
+  {
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var recipe in recipes)
+        {
+          <tr>
+            <td>@recipe.Title</td>
+            <td><a href="/recipe/@recipe.Id" class="btn btn-sm btn-info">View</a></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@code {
+  private List<RecipeDto> recipes = null!;
+
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      recipes = await Http.GetFromJsonAsync<List<RecipeDto>>("api/recipes") ?? new();
+    }
+    catch
+    {
+      recipes = new();
+    }
+  }
+}

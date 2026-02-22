@@ -1,0 +1,11 @@
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\bin\Debug\net9.0\ScreenShotRecipe.Application.Contracts.deps.json
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\bin\Debug\net9.0\ScreenShotRecipe.Application.Contracts.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\bin\Debug\net9.0\ScreenShotRecipe.Application.Contracts.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.AssemblyInfoInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.AssemblyInfo.cs
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\refint\ScreenShotRecipe.Application.Contracts.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.pdb
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ref\ScreenShotRecipe.Application.Contracts.dll
