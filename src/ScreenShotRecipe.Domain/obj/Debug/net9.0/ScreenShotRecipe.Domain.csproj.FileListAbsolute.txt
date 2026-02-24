@@ -5,6 +5,7 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotR
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.AssemblyInfoInputs.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.AssemblyInfo.cs
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.sourcelink.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\refint\ScreenShotRecipe.Domain.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Domain\obj\Debug\net9.0\ScreenShotRecipe.Domain.pdb

@@ -1,0 +1,17 @@
+@namespace ScreenShotRecipe.Web.Shared
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="typeof(MainLayout)">
+            <div class="container mt-4">
+                <h1>Page not found</h1>
+                <p role="alert">Sorry, there's nothing at this address.</p>
+                <p><a href="/">Go back to home</a></p>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

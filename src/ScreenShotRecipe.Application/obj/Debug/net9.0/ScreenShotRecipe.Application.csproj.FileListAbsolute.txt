@@ -10,6 +10,7 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\Screen
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenShotRecipe.Application.AssemblyInfoInputs.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenShotRecipe.Application.AssemblyInfo.cs
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenShotRecipe.Application.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenShotRecipe.Application.sourcelink.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenSh.3712B247.Up2Date
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\ScreenShotRecipe.Application.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application\obj\Debug\net9.0\refint\ScreenShotRecipe.Application.dll

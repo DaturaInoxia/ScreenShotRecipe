@@ -1,12 +1,23 @@
 using System.Threading.Tasks;
 using ScreenShotRecipe.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace ScreenShotRecipe.Infrastructure.Ocr
 {
     public class FakeOcrClient : IOcrClient
     {
+        private readonly ILogger<FakeOcrClient> _logger;
+
+        public FakeOcrClient(ILogger<FakeOcrClient> logger)
+        {
+            _logger = logger;
+            _logger.LogInformation("FakeOcrClient initialized (development/testing mode)");
+        }
+
         public Task<OcrResult> RecognizeAsync(byte[] imageBytes)
         {
+            _logger.LogInformation("OCR processing initiated on image with size: {ImageSize} bytes", imageBytes.Length);
+            
             // Mock OCR text extracted from recipe images
             var mockText = @"Chocolate Chip Cookies
 
@@ -33,6 +44,7 @@ INSTRUCTIONS:
 9. Cool on baking sheets for 2 minutes
 10. Remove to wire racks to cool completely";
 
+            _logger.LogInformation("Mock OCR data generated (fake service) with text length: {TextLength}, confidence: 95%", mockText.Length);
             return Task.FromResult(new OcrResult(mockText, 0.95));
         }
     }

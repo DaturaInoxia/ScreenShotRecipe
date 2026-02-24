@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Web (with cleanup)",
+      "type": "shell",
+      "command": "${workspaceFolder}/Helpers/RunWeb.ps1",
+      "isBackground": false,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "pwsh.exe",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+          }
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Web (no cleanup)",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["run"],
+      "options": {
+        "cwd": "${workspaceFolder}/src/ScreenShotRecipe.Web"
+      },
+      "isBackground": false,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Kill ScreenShotRecipe processes",
+      "type": "shell",
+      "command": "${workspaceFolder}/Helpers/KillScreenShotRecipeProcess.ps1",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "pwsh.exe",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+          }
+        }
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Full Cleanup",
+      "type": "shell",
+      "command": "${workspaceFolder}/Helpers/FullCleanup.ps1",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "pwsh.exe",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+          }
+        }
+      },
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}

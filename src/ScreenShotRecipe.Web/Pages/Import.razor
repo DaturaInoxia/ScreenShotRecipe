@@ -1,4 +1,5 @@
 @page "/import"
+@rendermode InteractiveServer
 @using ScreenShotRecipe.Application.Contracts.Dtos
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Net.Http.Json
@@ -12,11 +13,11 @@
 
   <div class="form-group">
     <label for="fileInput">Select Images:</label>
-    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="@HandleFileSelected" disabled="@isLoading" />
+    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="HandleFileSelected" />
   </div>
 
   <div class="form-group">
-    <button class="btn btn-primary" @onclick="HandleImport" disabled="@(isLoading || selectedFiles.Count == 0)">
+    <button class="btn btn-primary" @onclick="HandleImport" disabled="@isLoading">
       @(isLoading ? "Importing..." : "Import Recipe")
     </button>
   </div>
@@ -91,7 +92,7 @@
     }
 
     isLoading = true;
-    message = string.Empty;
+    message = "Importing... Processing images with OCR and LLM parser";
     isError = false;
     StateHasChanged();
 
@@ -104,32 +105,29 @@
         form.Add(byteContent, "files", fileName);
       }
 
-      Console.WriteLine($"Sending {selectedFiles.Count} files to /api/import...");
+      // Post to API endpoint
       var response = await Http.PostAsync("api/import", form);
-      Console.WriteLine($"Response status: {response.StatusCode}");
       
       if (response.IsSuccessStatusCode)
       {
         var content = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Response content: {content}");
         importedRecipe = JsonSerializer.Deserialize<RecipeDto>(content, 
           new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        message = "Recipe imported successfully!";
+        message = $"✅ Success! Recipe '{importedRecipe?.Title}' imported with {importedRecipe?.Ingredients.Count ?? 0} ingredients and {importedRecipe?.Steps.Count ?? 0} steps.";
+        isError = false;
         selectedFiles.Clear();
       }
       else
       {
         var errorContent = await response.Content.ReadAsStringAsync();
-        message = $"Failed to import recipe: {response.StatusCode} - {errorContent}";
+        message = $"❌ Import failed: HTTP {response.StatusCode}\n{errorContent}";
         isError = true;
-        Console.WriteLine($"Error: {message}");
       }
     }
     catch (Exception ex)
     {
-      message = $"Error: {ex.Message}";
+      message = $"❌ Error importing recipe: {ex.Message}\n{ex.InnerException?.Message}";
       isError = true;
-      Console.WriteLine($"Exception: {ex}");
     }
     finally
     {

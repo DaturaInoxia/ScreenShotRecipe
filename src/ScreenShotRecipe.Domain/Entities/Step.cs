@@ -1,8 +1,10 @@
+using System;
+
 namespace ScreenShotRecipe.Domain.Entities
 {
     public class Step
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public int Ordinal { get; set; }
         public string Text { get; set; } = string.Empty;
     }

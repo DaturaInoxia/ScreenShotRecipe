@@ -1,3 +1,5 @@
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\appsettings.Development.json
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\appsettings.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\BlazorDebugProxy\BrowserDebugHost.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\BlazorDebugProxy\BrowserDebugHost.runtimeconfig.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\BlazorDebugProxy\BrowserDebugProxy.dll
@@ -23,6 +25,15 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Microsoft.Enti
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Sqlite.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.AspNetCore.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Extensions.Hosting.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Extensions.Logging.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Formatting.Compact.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Settings.Configuration.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Sinks.Console.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Sinks.Debug.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\Serilog.Sinks.File.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\SQLitePCLRaw.batteries_v2.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\SQLitePCLRaw.core.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\SQLitePCLRaw.provider.e_sqlite3.dll
@@ -65,6 +76,7 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotReci
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotRecipe.Web.MvcApplicationPartsAssemblyInfo.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotRecipe.Web.RazorAssemblyInfo.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotRecipe.Web.RazorAssemblyInfo.cs
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotRecipe.Web.sourcelink.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\rjimswa.dswa.cache.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
@@ -73,7 +85,6 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\scopedcss\Shar
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\scopedcss\bundle\ScreenShotRecipe.Web.styles.css
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\scopedcss\projectbundle\ScreenShotRecipe.Web.bundle.scp.css
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\qh67lf9lew-c77cualry3.gz
-D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\dhypxm8llg-659tps2rcu.gz
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\j3mr6laknr-psvbgxizg7.gz
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\oj1p7v2h9k-psvbgxizg7.gz
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\staticwebassets.build.json

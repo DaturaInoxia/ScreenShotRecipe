@@ -5,6 +5,7 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.AssemblyInfoInputs.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.AssemblyInfo.cs
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.csproj.CoreCompileInputs.cache
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.sourcelink.json
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\refint\ScreenShotRecipe.Application.Contracts.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Application.Contracts\obj\Debug\net9.0\ScreenShotRecipe.Application.Contracts.pdb
