@@ -99,7 +99,7 @@ As a user, after import I want to edit parsed fields (fix ingredient amounts, re
 ## Testing Guidance
 
 - Unit tests for `Domain` and `Application` layers covering parsing logic, entity invariants, and ImportJob state transitions.
-- Integration tests mocking Azure Vision responses and LLM parsing to validate the import pipeline, including retry logic and diagnostics.
+- Integration tests mocking GPT-4o extraction responses to validate the import pipeline, including retry logic and diagnostics.
 - End-to-end smoke test that uploads sample image sets and verifies UI displays parsed recipe and images.
 - Performance test to validate SC-002 with representative network conditions.
 
@@ -112,6 +112,6 @@ As a user, after import I want to edit parsed fields (fix ingredient amounts, re
 
 ## Open Questions (none required for MVP)
 
-- No critical clarifications required; defaults chosen: Azure Vision OCR, SQLite + local filesystem storage, Blazor Server UI.
+- No critical clarifications required; defaults chosen: GPT-4o multimodal extraction, SQLite + local filesystem storage, Blazor Server UI.
 
 ```

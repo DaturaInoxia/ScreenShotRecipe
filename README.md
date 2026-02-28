@@ -18,5 +18,6 @@ docker run -v $(pwd)/data:/data -p 8080:80 screenshotrecipe:latest
 ```
 
 Notes:
-- This scaffold contains stub implementations for OCR and LLM parsing (see Infrastructure stubs). Replace them with production integrations (Azure Cognitive Services SDK and Azure OpenAI SDK).
+- Production extraction uses Azure OpenAI GPT-4o multimodal for combined OCR and recipe parsing.
+- A fake extraction service is available for development without API keys (set `ServiceImplementation:UseRealExtractionService` to `false`).
 - SQLite database file and images are stored under `./data` by default when running via Docker with the provided compose override.

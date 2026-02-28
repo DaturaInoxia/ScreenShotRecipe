@@ -139,7 +139,7 @@ tests/
 ### Phase 0: Research ✅
 - **Output**: [research.md](research.md)
 - **Key Decisions**:
-  - GPT-4o multimodal replaces Azure Vision OCR
+  - GPT-4o multimodal for combined OCR + parsing
   - Server-side image preprocessing with SixLabors.ImageSharp
   - Cost: ~$4-5/month for typical family usage
 
