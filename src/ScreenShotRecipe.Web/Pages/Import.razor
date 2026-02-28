@@ -9,8 +9,13 @@
 @inject ILogger<Import> Logger
 
 <div class="container mt-4">
-  <h1>Import Recipe from Images</h1>
-  <p>Select 1-6 image files (screenshots or photos of your recipe) and click Import.</p>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Import Recipe from Images</h1>
+    <a href="/recipes" class="btn btn-outline-secondary">
+      <span class="bi bi-arrow-left me-1"></span>Back to Recipes
+    </a>
+  </div>
+  <p>Select 1-6 image files (screenshots or photos of your recipe) and click Import.<b>Will only do one recipe at a time.</b></p>
 
   <div class="form-group mb-3">
     <label for="fileInput">Select Images:</label>

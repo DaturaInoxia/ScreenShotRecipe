@@ -64,13 +64,16 @@
     <form>
       @* Title *@
       <div class="mb-3">
-        <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+        <label for="title" class="form-label">Title @if (validationAttempted && string.IsNullOrWhiteSpace(recipe.Title)) {<span class="text-danger">*</span>}</label>
         <input type="text" 
-               class="form-control @(string.IsNullOrWhiteSpace(recipe.Title) ? "is-invalid" : "") @GetLowConfidenceClass()"
+               class="form-control @(validationAttempted && string.IsNullOrWhiteSpace(recipe.Title) ? "is-invalid" : "") @GetLowConfidenceClass()"
                id="title" 
                @bind="recipe.Title" 
                maxlength="500" />
-        <div class="invalid-feedback">Title is required</div>
+        @if (validationAttempted && string.IsNullOrWhiteSpace(recipe.Title))
+        {
+          <div class="text-danger small mt-1">Title is required</div>
+        }
         <div class="form-text">@recipe.Title.Length / 500 characters</div>
       </div>
 
@@ -235,6 +238,7 @@
   private string newTag = "";
   private bool showUnsavedConfirm = false;
   private bool hasUnsavedChanges = false;
+  private bool validationAttempted = false;
 
   protected override async Task OnInitializedAsync()
   {
@@ -265,12 +269,18 @@
             Quantity = i.Quantity,
             Unit = i.Unit
           }).ToList(),
-          Steps = originalRecipe.Steps.Select(s => new StepEditDto
+          Steps = originalRecipe.Steps.OrderBy(s => s.Ordinal).Select(s => new StepEditDto
           {
             Ordinal = s.Ordinal,
             Text = s.Text
           }).ToList()
         };
+        
+        // Ensure steps are numbered sequentially starting at 1
+        for (int i = 0; i < recipe.Steps.Count; i++)
+        {
+          recipe.Steps[i].Ordinal = i + 1;
+        }
       }
     }
     catch (Exception ex)
@@ -288,6 +298,8 @@
   private async Task SaveRecipe()
   {
     if (recipe == null) return;
+    
+    validationAttempted = true;
     
     if (string.IsNullOrWhiteSpace(recipe.Title))
     {
@@ -307,10 +319,10 @@
 
       if (response.IsSuccessStatusCode)
       {
-        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-        if (result != null && result.TryGetValue("version", out var newVersion))
+        var result = await response.Content.ReadFromJsonAsync<UpdateRecipeResponse>();
+        if (result != null)
         {
-          recipe.Version = Convert.ToInt32(newVersion);
+          recipe.Version = result.Version;
         }
         successMessage = "Recipe saved successfully!";
         hasUnsavedChanges = false;
@@ -464,5 +476,11 @@
       return "border-warning";
     }
     return "";
+  }
+
+  private class UpdateRecipeResponse
+  {
+    public string Message { get; set; } = "";
+    public int Version { get; set; }
   }
 }

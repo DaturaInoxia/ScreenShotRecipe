@@ -25,40 +25,45 @@
   }
   else
   {
-    <div class="d-flex justify-content-between align-items-start mb-3 no-print">
-      <div>
-        <h1>@recipe.Title</h1>
-        @if (recipe.OverallConfidence.HasValue)
-        {
-          <span class="@GetConfidenceBadgeClass()">
-            Confidence: @($"{recipe.OverallConfidence.Value:P0}")
-          </span>
-          @if (!string.IsNullOrEmpty(recipe.ConfidenceNotes))
+    <div class="recipe-card-wrapper" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #e0e7ef; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem;">
+      <div class="d-flex justify-content-between align-items-start mb-3 no-print">
+        <div>
+          <h1 style="color: #1a365d; font-weight: 700; border-bottom: 3px solid #3182ce; padding-bottom: 0.5rem; margin-bottom: 1rem;">@recipe.Title</h1>
+          @if (recipe.OverallConfidence.HasValue)
           {
-            <small class="text-muted d-block mt-1">@recipe.ConfidenceNotes</small>
+            <span class="@GetConfidenceBadgeClass()">
+              Confidence: @($"{recipe.OverallConfidence.Value:P0}")
+            </span>
+            @if (!string.IsNullOrEmpty(recipe.ConfidenceNotes))
+            {
+              <small class="text-muted d-block mt-1">@recipe.ConfidenceNotes</small>
+            }
           }
-        }
+        </div>
+        <div>
+          <button class="btn btn-outline-success me-2" @onclick="PrintRecipe" title="Print Recipe">
+            <span class="bi bi-printer me-1"></span>Print
+          </button>
+          <a href="/recipes" class="btn btn-outline-secondary me-2">Back to Recipes</a>
+          <a href="/recipe/@recipe.Id/edit" class="btn btn-outline-primary me-2">Edit</a>
+          <button class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation" title="Delete Recipe">
+            <span class="bi bi-trash me-1"></span>Delete
+          </button>
+        </div>
       </div>
-      <div>
-        <button class="btn btn-outline-success me-2" @onclick="PrintRecipe" title="Print Recipe">
-          <span class="bi bi-printer me-1"></span>Print
-        </button>
-        <a href="/recipes" class="btn btn-outline-secondary me-2">Back to Recipes</a>
-        <a href="/recipe/@recipe.Id/edit" class="btn btn-outline-primary me-2">Edit</a>
-        <button class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation" title="Delete Recipe">
-          <span class="bi bi-trash me-1"></span>Delete
-        </button>
-      </div>
-    </div>
 
     @* Print-only header *@
     <div class="print-only">
       <h1 class="print-title">@recipe.Title</h1>
+      @if (recipe.Tags != null && recipe.Tags.Count > 0)
+      {
+        <p style="font-style: italic; margin-bottom: 1em;">Tags: @string.Join(", ", recipe.Tags)</p>
+      }
     </div>
 
     @if (recipe.Tags != null && recipe.Tags.Count > 0)
     {
-      <div class="mb-3">
+      <div class="mb-3 no-print">
         @foreach (var tag in recipe.Tags)
         {
           <span class="badge bg-secondary me-1">@tag</span>
@@ -143,7 +148,7 @@
 
     @if (recipe.ImageIds != null && recipe.ImageIds.Count > 0)
     {
-      <div class="card mb-4">
+      <div class="card mb-4 no-print">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Original Images</h5>
           <span class="badge bg-primary">@recipe.ImageIds.Count</span>
@@ -167,6 +172,7 @@
         </div>
       </div>
     }
+    </div> @* End recipe-card-wrapper *@
   }
 </div>
 

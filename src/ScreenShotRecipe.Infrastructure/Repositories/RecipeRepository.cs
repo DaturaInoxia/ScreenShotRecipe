@@ -174,24 +174,76 @@ namespace ScreenShotRecipe.Infrastructure.Repositories
             {
                 _logger.LogInformation("Updating recipe: {RecipeId}, Version: {Version}", recipe.Id, recipe.Version);
 
-                // Load existing recipe to check version
-                var existing = await _db.Recipes
-                    .Include(r => r.Ingredients)
-                    .Include(r => r.Steps)
-                    .FirstOrDefaultAsync(r => r.Id == recipe.Id, cancellationToken);
+                // Get the actual DB version using a projection to avoid EF Core returning tracked entity
+                var dbVersion = await _db.Recipes
+                    .Where(r => r.Id == recipe.Id)
+                    .Select(r => (int?)r.Version)
+                    .FirstOrDefaultAsync(cancellationToken);
 
-                if (existing == null)
+                if (dbVersion == null)
                 {
                     _logger.LogWarning("Recipe not found for update: {RecipeId}", recipe.Id);
                     return false;
                 }
 
-                // Optimistic concurrency check
+                // Optimistic concurrency check: client's version should match DB version
                 var expectedVersion = recipe.Version - 1;
-                if (existing.Version != expectedVersion)
+                if (dbVersion.Value != expectedVersion)
                 {
                     _logger.LogWarning("Version mismatch for recipe {RecipeId}: expected {Expected}, actual {Actual}", 
-                        recipe.Id, expectedVersion, existing.Version);
+                        recipe.Id, expectedVersion, dbVersion.Value);
+                    return false;
+                }
+
+                // Get IDs of ingredients/steps that actually exist in DB (not from tracked entity)
+                var existingIngredientIds = await _db.Set<Ingredient>()
+                    .Where(i => i.RecipeId == recipe.Id)
+                    .Select(i => i.Id)
+                    .ToListAsync(cancellationToken);
+
+                var existingStepIds = await _db.Set<Step>()
+                    .Where(s => s.RecipeId == recipe.Id)
+                    .Select(s => s.Id)
+                    .ToListAsync(cancellationToken);
+
+                // Materialize new ingredients/steps from the input recipe
+                var newIngredients = recipe.Ingredients.Select(i => new Ingredient
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = recipe.Id,
+                    RawText = i.RawText,
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Unit = i.Unit
+                }).ToList();
+
+                var newSteps = recipe.Steps.Select(s => new Step
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = recipe.Id,
+                    Ordinal = s.Ordinal,
+                    Text = s.Text
+                }).ToList();
+
+                // Delete old ingredients and steps by ID (direct DB operation)
+                if (existingIngredientIds.Any())
+                {
+                    await _db.Set<Ingredient>()
+                        .Where(i => existingIngredientIds.Contains(i.Id))
+                        .ExecuteDeleteAsync(cancellationToken);
+                }
+
+                if (existingStepIds.Any())
+                {
+                    await _db.Set<Step>()
+                        .Where(s => existingStepIds.Contains(s.Id))
+                        .ExecuteDeleteAsync(cancellationToken);
+                }
+
+                // Update the recipe (reload to get clean tracked entity after deletes)
+                var existing = await _db.Recipes.FindAsync(new object[] { recipe.Id }, cancellationToken);
+                if (existing == null)
+                {
                     return false;
                 }
 
@@ -203,21 +255,9 @@ namespace ScreenShotRecipe.Infrastructure.Repositories
                 existing.ConfidenceNotes = recipe.ConfidenceNotes;
                 existing.Version = recipe.Version;
 
-                // Update ingredients - remove old, add new
-                _db.RemoveRange(existing.Ingredients);
-                foreach (var ing in recipe.Ingredients)
-                {
-                    ing.RecipeId = recipe.Id;
-                    existing.Ingredients.Add(ing);
-                }
-
-                // Update steps - remove old, add new
-                _db.RemoveRange(existing.Steps);
-                foreach (var step in recipe.Steps)
-                {
-                    step.RecipeId = recipe.Id;
-                    existing.Steps.Add(step);
-                }
+                // Add new ingredients and steps
+                _db.Set<Ingredient>().AddRange(newIngredients);
+                _db.Set<Step>().AddRange(newSteps);
 
                 await _db.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Recipe updated successfully: {RecipeId}, new Version: {Version}", recipe.Id, recipe.Version);
@@ -226,6 +266,87 @@ namespace ScreenShotRecipe.Infrastructure.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating recipe: {RecipeId}", recipe.Id);
+                throw;
+            }
+        }
+
+        public async Task<int?> UpdateRecipeAsync(
+            Guid id,
+            int clientVersion,
+            string title,
+            string? notes,
+            List<string> tags,
+            List<(string RawText, string? Name, string? Quantity, string? Unit)> ingredients,
+            List<(int Ordinal, string Text)> steps,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Updating recipe {RecipeId} from version {Version}", id, clientVersion);
+
+                // Load recipe without collections for version check
+                var recipe = await _db.Recipes.FindAsync(new object[] { id }, cancellationToken);
+
+                if (recipe == null)
+                {
+                    _logger.LogWarning("Recipe not found: {RecipeId}", id);
+                    return null;
+                }
+
+                // Optimistic concurrency check
+                if (recipe.Version != clientVersion)
+                {
+                    _logger.LogWarning("Version mismatch for recipe {RecipeId}: expected {Expected}, actual {Actual}",
+                        id, clientVersion, recipe.Version);
+                    return null;
+                }
+
+                // Update scalar properties
+                recipe.Title = title;
+                recipe.Notes = notes;
+                recipe.Tags = tags;
+                recipe.Version = clientVersion + 1;
+                recipe.UpdatedAt = DateTime.UtcNow;
+
+                // Delete old ingredients and steps using ExecuteDelete (bypasses change tracking)
+                await _db.Set<Ingredient>()
+                    .Where(i => i.RecipeId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                await _db.Set<Step>()
+                    .Where(s => s.RecipeId == id)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+                // Add new ingredients
+                var newIngredients = ingredients.Select(ing => new Ingredient
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = id,
+                    RawText = ing.RawText,
+                    Name = ing.Name,
+                    Quantity = ing.Quantity,
+                    Unit = ing.Unit
+                }).ToList();
+
+                // Add new steps
+                var newSteps = steps.Select(s => new Step
+                {
+                    Id = Guid.NewGuid(),
+                    RecipeId = id,
+                    Ordinal = s.Ordinal,
+                    Text = s.Text
+                }).ToList();
+
+                _db.Set<Ingredient>().AddRange(newIngredients);
+                _db.Set<Step>().AddRange(newSteps);
+
+                await _db.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Recipe updated successfully: {RecipeId}, new version: {Version}", id, recipe.Version);
+                return recipe.Version;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating recipe: {RecipeId}", id);
                 throw;
             }
         }

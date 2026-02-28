@@ -65,9 +65,9 @@
       @foreach (var recipe in recipes)
       {
         <div class="col">
-          <div class="card h-100 recipe-card" @onclick="() => NavigateToRecipe(recipe.Id)" style="cursor: pointer;">
+          <div class="card h-100 recipe-card" @onclick="() => NavigateToRecipe(recipe.Id)" style="cursor: pointer; background: linear-gradient(135deg, #f5faff 0%, #fafcff 100%); border: 2px solid #d4e6f7; border-radius: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.2s, box-shadow 0.2s;">
             <div class="card-body">
-              <h5 class="card-title">@recipe.Title</h5>
+              <h5 class="card-title" style="color: #1a365d; font-weight: 700;">@recipe.Title</h5>
               
               @if (recipe.Tags != null && recipe.Tags.Count > 0)
               {

@@ -76,6 +76,9 @@ As a user, after import I want to edit parsed fields (fix ingredient amounts, re
 - **FR-008**: System MUST persist data to SQLite by default, with data access abstracted to enable database replacement.
 - **FR-009**: The import workflow MUST implement retries with exponential backoff for transient failures and mark jobs with clear diagnostics if permanently failing.
 - **FR-010**: System MUST include confidence metadata for fields derived from OCR/LLM and surface low-confidence items for user review.
+- **FR-011**: System MUST allow users to delete recipes via UI with a confirmation dialog and corresponding DELETE API endpoint.
+- **FR-012**: System MUST provide a print-friendly view of recipes with clean printable output (hiding navigation, buttons, and app chrome).
+- **FR-013**: UI navigation links MUST have sufficient contrast (WCAG AA compliant) for readability.
 
 ### Key Entities
 

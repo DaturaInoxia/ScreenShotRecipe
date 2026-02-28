@@ -95,6 +95,7 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotReci
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ScreenShotRecipe.Web.genruntimeconfig.cache
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\ref\ScreenShotRecipe.Web.dll
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\SixLabors.ImageSharp.dll
-D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\qh67lf9lew-46rafzqene.gz
-D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\j3mr6laknr-nwn8wh7uyy.gz
-D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\oj1p7v2h9k-nwn8wh7uyy.gz
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\scopedcss\Pages\RecipeDetail.razor.rz.scp.css
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\j3mr6laknr-i2voavm8f8.gz
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\oj1p7v2h9k-i2voavm8f8.gz
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\qh67lf9lew-59y82r3bgz.gz

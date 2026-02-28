@@ -141,9 +141,9 @@ Project uses Clean Architecture with:
 - [X] T059 [P] Add print CSS styles (@media print) to hide app chrome in src/ScreenShotRecipe.Web/wwwroot/css/app.css
 - [X] T060 [P] Fix NavMenu link contrast (white text, better hover states) in src/ScreenShotRecipe.Web/Shared/NavMenu.razor.css
 - [X] T061 [P] Update Helpers/RunWeb.bat to set ASPNETCORE_ENVIRONMENT=Development for user secrets
-- [ ] T053 [P] Update quickstart.md with current fake vs real service configuration in specs/001-import-recipe/quickstart.md
-- [ ] T054 Run end-to-end test: upload images → verify import → search → view → edit → delete → verify persistence
-- [ ] T055 Performance validation: verify import of 6 images completes within 30 seconds per SC-002
+- [X] T053 [P] Update quickstart.md with current fake vs real service configuration in specs/001-import-recipe/quickstart.md
+- [X] T054 Run end-to-end test: upload images → verify import → search → view → edit → delete → verify persistence
+- [X] T055 Performance validation: verify import of 6 images completes within 30 seconds per SC-002
 
 ---
 
@@ -246,8 +246,8 @@ T014: Implement ImportJobRepository
 | Phase 6 | T050-T061 | 12 | Polish, delete, print, UI fixes |
 
 **Total Tasks**: 61  
-**Completed**: 58  
-**Remaining**: 3 (T053, T054, T055)  
+**Completed**: 61  
+**Remaining**: 0  
 **Per User Story**: US1=12, US2=9, US3=12  
 **MVP Scope**: Phases 1-3 (28 tasks)  
 **Parallel Opportunities**: Phases 1-2 have high parallelism; US phases are sequential within but parallel across stories

@@ -430,55 +430,32 @@ app.MapPut("/api/recipes/{id:guid}", async (Guid id, RecipeEditDto editDto, IRec
 
         logger.LogInformation("Updating recipe {RecipeId}, Version {Version}", id, editDto.Version);
 
-        // Get existing recipe to preserve ImportJob relationship and update
-        var existing = await repo.GetAsync(id);
-        if (existing == null)
-        {
-            return Results.NotFound();
-        }
+        // Convert DTOs to tuples for repository method
+        var ingredients = editDto.Ingredients
+            .Select(i => (i.RawText, i.Name, i.Quantity, i.Unit))
+            .ToList();
 
-        // Build updated recipe
-        existing.Title = editDto.Title;
-        existing.Notes = editDto.Notes;
-        existing.Tags = editDto.Tags;
-        existing.Version = editDto.Version + 1; // Increment version
-        
-        // Clear and rebuild ingredients
-        existing.Ingredients.Clear();
-        foreach (var ing in editDto.Ingredients)
-        {
-            existing.Ingredients.Add(new Ingredient
-            {
-                Id = Guid.NewGuid(),
-                RecipeId = id,
-                RawText = ing.RawText,
-                Name = ing.Name,
-                Quantity = ing.Quantity,
-                Unit = ing.Unit
-            });
-        }
+        var steps = editDto.Steps
+            .Select(s => (s.Ordinal, s.Text))
+            .ToList();
 
-        // Clear and rebuild steps
-        existing.Steps.Clear();
-        foreach (var step in editDto.Steps)
-        {
-            existing.Steps.Add(new Step
-            {
-                Id = Guid.NewGuid(),
-                RecipeId = id,
-                Ordinal = step.Ordinal,
-                Text = step.Text
-            });
-        }
+        // Let repository handle all entity tracking internally
+        var newVersion = await repo.UpdateRecipeAsync(
+            id,
+            editDto.Version,
+            editDto.Title,
+            editDto.Notes,
+            editDto.Tags,
+            ingredients,
+            steps);
 
-        var success = await repo.UpdateAsync(existing);
-        if (!success)
+        if (newVersion == null)
         {
-            return Results.Conflict(new { error = "Version conflict - recipe was modified by another user" });
+            return Results.Conflict(new { error = "Version conflict - recipe was modified by another user or not found" });
         }
 
         logger.LogInformation("Recipe updated successfully: {RecipeId}", id);
-        return Results.Ok(new { message = "Recipe updated", version = existing.Version });
+        return Results.Ok(new { message = "Recipe updated", version = newVersion.Value });
     }
     catch (Exception ex)
     {

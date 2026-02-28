@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScreenShotRecipe.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bc7735637ca4c38855dbaa8c4d82762c15ff2d2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8333211a71a229f0a855305ad7fe0ccf0e80451d")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScreenShotRecipe.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScreenShotRecipe.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

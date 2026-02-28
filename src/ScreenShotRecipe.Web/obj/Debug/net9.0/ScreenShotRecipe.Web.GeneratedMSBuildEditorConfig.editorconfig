@@ -28,10 +28,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW1wb3J0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/src/ScreenShotRecipe/src/ScreenShotRecipe.Web/Pages/RecipeDetail.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVjaXBlRGV0YWlsLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
 [D:/src/ScreenShotRecipe/src/ScreenShotRecipe.Web/Pages/RecipeEdit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVjaXBlRWRpdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -55,6 +51,10 @@ build_metadata.AdditionalFiles.CssScope =
 [D:/src/ScreenShotRecipe/src/ScreenShotRecipe.Web/Shared/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXF9JbXBvcnRzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
+
+[D:/src/ScreenShotRecipe/src/ScreenShotRecipe.Web/Pages/RecipeDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVjaXBlRGV0YWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-lbjc3gkzhd
 
 [D:/src/ScreenShotRecipe/src/ScreenShotRecipe.Web/Shared/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=

@@ -32,8 +32,18 @@ namespace ScreenShotRecipe.Infrastructure.Persistence
                         v => v.Split(',', System.StringSplitOptions.RemoveEmptyEntries).ToList())
                     .Metadata
                     .SetValueComparer(listComparer);
-                eb.OwnsMany(r => r.Ingredients);
-                eb.OwnsMany(r => r.Steps);
+                
+                // Ingredients - regular relationship with cascade delete
+                eb.HasMany(r => r.Ingredients)
+                    .WithOne()
+                    .HasForeignKey(i => i.RecipeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // Steps - regular relationship with cascade delete
+                eb.HasMany(r => r.Steps)
+                    .WithOne()
+                    .HasForeignKey(s => s.RecipeId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 
                 // Recipe -> ImportJob relationship
                 eb.HasOne(r => r.ImportJob)
@@ -44,6 +54,20 @@ namespace ScreenShotRecipe.Infrastructure.Persistence
                 // Indexes
                 eb.HasIndex(r => r.CreatedAt);
                 eb.HasIndex(r => r.ImportJobId);
+            });
+
+            // Ingredient configuration
+            modelBuilder.Entity<Ingredient>(eb => {
+                eb.HasKey(i => i.Id);
+                eb.Property(i => i.RawText).IsRequired();
+                eb.HasIndex(i => i.RecipeId);
+            });
+
+            // Step configuration
+            modelBuilder.Entity<Step>(eb => {
+                eb.HasKey(s => s.Id);
+                eb.Property(s => s.Text).IsRequired();
+                eb.HasIndex(s => s.RecipeId);
             });
             
             // ImportJob configuration

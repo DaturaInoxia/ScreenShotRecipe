@@ -9,8 +9,8 @@ body {
 
 .page {
     display: flex;
-    flex-direction: row;
-    height: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 main {
@@ -19,23 +19,13 @@ main {
     flex-direction: column;
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-    width: 250px;
-    height: 100vh;
-    overflow-y: auto;
-    position: sticky;
-    top: 0;
-}
-
 .top-row {
     background-color: #f7f7f7;
     border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
     height: 3.5rem;
     display: flex;
     align-items: center;
-    padding-right: 1rem;
+    padding: 0 1rem;
 }
 
 .content {
@@ -85,113 +75,365 @@ main {
 
 /* Print styles for clean recipe output */
 @media print {
-    /* Hide navigation and app chrome */
+    /* === CRITICAL: Reset page layout === */
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .page {
+        display: block !important;
+        flex-direction: unset !important;
+        height: auto !important;
+    }
+
+    /* === HIDE ALL NAVIGATION AND CHROME === */
     .sidebar,
     .top-row,
     .no-print,
     .modal,
     .btn,
     button,
-    a.btn {
+    a.btn,
+    a[href],
+    .badge.bg-primary,
+    .badge.bg-secondary,
+    nav,
+    header,
+    footer,
+    .blazor-error-boundary {
         display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        position: absolute !important;
+        left: -9999px !important;
     }
 
-    /* Show print-only content */
+    /* === SHOW PRINT-ONLY CONTENT === */
     .print-only {
         display: block !important;
-    }
-
-    /* Reset page layout for print */
-    .page {
-        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: auto !important;
         height: auto !important;
     }
 
+    /* === MAIN CONTENT AREA === */
     main {
         display: block !important;
-    }
-
-    .content {
+        width: 100% !important;
+        margin: 0 !important;
         padding: 0 !important;
-        overflow: visible !important;
     }
 
-    body, html {
-        height: auto !important;
+    .content,
+    article.content {
+        padding: 0 !important;
+        margin: 0 !important;
         overflow: visible !important;
+        width: 100% !important;
     }
 
-    /* Print title styling */
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* === PRINT TITLE === */
     .print-title {
-        font-size: 24pt;
-        font-weight: bold;
-        margin-bottom: 0.5em;
-        border-bottom: 2px solid #333;
-        padding-bottom: 0.25em;
+        font-size: 24pt !important;
+        font-weight: bold !important;
+        margin: 0 0 0.5em 0 !important;
+        padding-bottom: 0.25em !important;
+        border-bottom: 2px solid #000 !important;
+        color: #000 !important;
     }
 
-    /* Card styling for print */
+    /* === CARDS: Clean, borderless look === */
     .card {
-        border: 1px solid #ccc !important;
+        border: none !important;
         box-shadow: none !important;
+        background: transparent !important;
+        margin-bottom: 1.5em !important;
         break-inside: avoid;
         page-break-inside: avoid;
-        margin-bottom: 1rem !important;
     }
 
     .card-header {
-        background-color: #f5f5f5 !important;
+        background: transparent !important;
+        border: none !important;
         border-bottom: 1px solid #ccc !important;
+        padding: 0 0 0.5em 0 !important;
+        margin-bottom: 0.5em !important;
     }
 
-    /* List styling */
+    .card-header h5 {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+        color: #000 !important;
+    }
+
+    .card-body {
+        padding: 0 !important;
+    }
+
+    .card-title {
+        font-size: 14pt !important;
+        font-weight: bold !important;
+        margin-bottom: 0.5em !important;
+        color: #000 !important;
+    }
+
+    .card-text {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        color: #000 !important;
+    }
+
+    /* === LISTS: Clean ingredient and step lists === */
+    .list-group {
+        border: none !important;
+    }
+
     .list-group-item {
         border: none !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        padding: 0.25em 0 !important;
+        background: transparent !important;
+        font-size: 11pt !important;
+        color: #000 !important;
     }
 
-    .list-group-numbered > li::before {
-        font-weight: bold;
+    .list-group-flush > .list-group-item {
+        border: none !important;
     }
 
-    /* Badge styling for print */
-    .badge {
-        border: 1px solid #666 !important;
-        color: #333 !important;
-        background-color: #eee !important;
+    ul, ol {
+        margin: 0 !important;
+        padding-left: 1.5em !important;
     }
 
-    /* Hide image section in print (optional - can be removed if want images) */
-    .col-6.col-md-4.col-lg-3 {
-        display: none !important;
+    li {
+        margin-bottom: 0.25em !important;
+        font-size: 11pt !important;
+        color: #000 !important;
     }
 
-    /* Ensure ingredients and steps are side by side */
+    /* === INGREDIENT BADGES: Show as plain text === */
+    .badge.bg-light {
+        display: inline !important;
+        visibility: visible !important;
+        position: static !important;
+        border: none !important;
+        background: transparent !important;
+        color: #000 !important;
+        font-weight: bold !important;
+        padding: 0 !important;
+        margin-right: 0.25em !important;
+        width: auto !important;
+        height: auto !important;
+        left: auto !important;
+    }
+
+    /* === LAYOUT: Side by side columns === */
     .row {
         display: flex !important;
-        flex-wrap: wrap !important;
-    }
-
-    .col-lg-5, .col-lg-7 {
-        flex: 0 0 auto !important;
+        flex-wrap: nowrap !important;
+        gap: 2em !important;
+        margin: 0 !important;
     }
 
     .col-lg-5 {
-        width: 40% !important;
+        flex: 0 0 35% !important;
+        width: 35% !important;
+        padding: 0 !important;
     }
 
     .col-lg-7 {
+        flex: 0 0 60% !important;
         width: 60% !important;
+        padding: 0 !important;
     }
 
-    /* Typography for print */
+    .mb-4 {
+        margin-bottom: 1em !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 0.75em !important;
+    }
+
+    /* === HIDE IMAGES SECTION (optional) === */
+    .row:last-of-type {
+        /* Images row - hide for cleaner print */
+    }
+
+    /* === TYPOGRAPHY === */
     h1, h2, h3, h4, h5, h6 {
-        page-break-after: avoid;
+        page-break-after: avoid !important;
+        color: #000 !important;
     }
 
-    p, li {
+    p {
         orphans: 3;
         widows: 3;
+        color: #000 !important;
+    }
+
+    /* === STEP NUMBERS === */
+    .list-group-numbered > li::marker {
+        font-weight: bold !important;
+        color: #000 !important;
+    }
+
+    /* === ALERT BOXES === */
+    .alert {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+        color: #000 !important;
+    }
+
+    /* === FORCE BLACK TEXT === */
+    * {
+        color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+/* ========================================
+   RECIPE LIST PAGE STYLING
+   ======================================== */
+
+/* Recipe card hover effect on the recipes list page */
+.recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    border-color: #3182ce !important;
+}
+
+/* ========================================
+   RECIPE DETAIL PAGE STYLING
+   ======================================== */
+
+/* Recipe Card Wrapper - Makes the recipe stand out */
+.recipe-card-wrapper {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #e0e7ef;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+/* Recipe Title Styling */
+.recipe-title {
+    color: #1a365d;
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 3px solid #3182ce;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Enhance the cards within recipe detail */
+.recipe-card-wrapper .card {
+    border: 1px solid #d1d9e6;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    overflow: hidden;
+}
+
+.recipe-card-wrapper .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.recipe-card-wrapper .card-header {
+    background: linear-gradient(135deg, #edf2f7 0%, #ffffff 100%);
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: 600;
+    color: #2d3748;
+    padding: 1rem 1.25rem;
+}
+
+.recipe-card-wrapper .card-header h5 {
+    color: #1a365d;
+    margin: 0;
+}
+
+.recipe-card-wrapper .card-body {
+    padding: 1.25rem;
+}
+
+/* Ingredient list styling */
+.recipe-card-wrapper .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.75rem 0;
+    transition: background-color 0.15s ease;
+}
+
+.recipe-card-wrapper .list-group-item:hover {
+    background-color: #f7fafc;
+}
+
+.recipe-card-wrapper .list-group-item:first-child {
+    border-top: none;
+}
+
+/* Step numbers styling */
+.recipe-card-wrapper .list-group-numbered > .list-group-item::before {
+    font-weight: 700;
+    color: #3182ce;
+    font-size: 1.1rem;
+}
+
+/* Badge enhancements */
+.recipe-card-wrapper .badge.bg-primary {
+    background-color: #3182ce !important;
+    font-weight: 600;
+}
+
+.recipe-card-wrapper .badge.bg-light {
+    background-color: #edf2f7 !important;
+    color: #2d3748 !important;
+    font-weight: 500;
+}
+
+/* Print styles for recipe card - clean output */
+@media print {
+    .recipe-card-wrapper {
+        background: white !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .recipe-title {
+        border-bottom-color: #000 !important;
+    }
+
+    .recipe-card-wrapper .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .recipe-card-wrapper .card-header {
+        background: #f5f5f5 !important;
+    }
+
+    .recipe-card-wrapper .card:hover {
+        box-shadow: none !important;
+        transform: none !important;
     }
 }
