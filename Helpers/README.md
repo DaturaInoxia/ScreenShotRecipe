@@ -75,6 +75,58 @@ Comprehensive cleanup script that:
 - When switching between projects (BlazorServer ↔ ScreenShotRecipe.Web)
 - To ensure a clean build state
 
+---
+
+## Deployment Scripts (Proxmox)
+
+Scripts for deploying to Proxmox LXC Docker container.
+
+### Deploy.ps1
+Full deployment script with options for deploying to Proxmox.
+
+**Usage:**
+```powershell
+# Full deploy (copy, build, restart)
+.\Helpers\Deploy.ps1
+
+# With custom server settings
+.\Helpers\Deploy.ps1 -Server 192.168.0.18 -User root
+
+# Skip build (just restart container)
+.\Helpers\Deploy.ps1 -SkipBuild
+
+# Check container status only
+.\Helpers\Deploy.ps1 -StatusOnly
+
+# View logs only
+.\Helpers\Deploy.ps1 -LogsOnly
+```
+
+### QuickDeploy.ps1
+Simple deployment script - edit the configuration variables inside the script.
+
+**Usage:**
+```powershell
+.\Helpers\QuickDeploy.ps1
+```
+
+### ViewLogs.ps1
+View Docker container logs from the Proxmox server.
+
+**Usage:**
+```powershell
+# View last 100 lines
+.\Helpers\ViewLogs.ps1
+
+# Follow logs (Ctrl+C to exit)
+.\Helpers\ViewLogs.ps1 -Follow
+
+# View last 50 lines
+.\Helpers\ViewLogs.ps1 -Tail 50
+```
+
+---
+
 ## PowerShell Execution Policy
 
 If you get an error like "cannot be loaded because running scripts is disabled", run PowerShell as Administrator and execute:
@@ -103,6 +155,9 @@ The `.vscode/tasks.json` file provides quick access to common tasks:
 | Run app (double-click) | `Helpers\RunWeb.bat` |
 | Kill app process | `.\Helpers\KillScreenShotRecipeProcess.ps1` |
 | Full cleanup | `.\Helpers\FullCleanup.ps1` |
+| **Deploy to Proxmox** | `.\Helpers\QuickDeploy.ps1` |
+| View Proxmox logs | `.\Helpers\ViewLogs.ps1 -Follow` |
+| Check Proxmox status | `.\Helpers\Deploy.ps1 -StatusOnly` |
 
 ## Available VS Code Tasks
 

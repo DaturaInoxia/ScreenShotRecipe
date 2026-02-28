@@ -1,0 +1,9 @@
+services:
+  screenshotrecipe:
+    build: .
+    volumes:
+      - ./data:/data
+    ports:
+      - "8080:80"
+    env_file:
+      - .env

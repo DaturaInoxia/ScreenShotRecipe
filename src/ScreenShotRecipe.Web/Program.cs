@@ -36,17 +36,26 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Configure services
+// Database path: use environment variable or default to app.db (local) vs /data/app.db (Docker)
+var dbPath = builder.Configuration["DatabasePath"] ?? 
+    (Directory.Exists("/data") ? "/data/app.db" : "app.db");
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlite("Data Source=app.db"));
+    opt.UseSqlite($"Data Source={dbPath}"));
+
 
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IImageAssetRepository, ImageAssetRepository>();
 builder.Services.AddScoped<IImportJobRepository, ImportJobRepository>();
 builder.Services.AddScoped<IImagePreprocessor, ImagePreprocessor>();
+
+// Auto-detect image storage path: use /data/images in Docker, ./data/images locally
+var imageStoragePath = builder.Configuration["ImageStoragePath"] 
+    ?? (Directory.Exists("/data") ? "/data/images" : "./data/images");
 builder.Services.AddSingleton<IStorage>(provider => 
 {
     var logger = provider.GetRequiredService<ILogger<FileSystemStorage>>();
-    return new FileSystemStorage("./data/images", logger);
+    return new FileSystemStorage(imageStoragePath, logger);
 });
 
 // Load and configure service implementation options (real vs fake)
