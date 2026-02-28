@@ -1,55 +1,192 @@
 @page "/recipes"
+@rendermode InteractiveServer
 @using ScreenShotRecipe.Application.Contracts.Dtos
+@using System.Text.Json
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <div class="container mt-4">
-  <h1>Recipes</h1>
-  <p>
-    <a href="/import" class="btn btn-primary">Import Recipe</a>
-  </p>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Recipes</h1>
+    <a href="/import" class="btn btn-primary">
+      <span class="me-1">+</span> Import Recipe
+    </a>
+  </div>
 
-  @if (recipes == null)
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="input-group">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Search by title, ingredient, or tag..." 
+               @bind="searchQuery"
+               @bind:event="oninput"
+               @onkeyup="HandleSearchKeyUp" />
+        <button class="btn btn-outline-secondary" type="button" @onclick="PerformSearch">
+          Search
+        </button>
+        @if (!string.IsNullOrEmpty(searchQuery))
+        {
+          <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">
+            Clear
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading)
   {
-    <p>Loading recipes...</p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">@(isSearching ? "Searching..." : "Loading recipes...")</p>
+    </div>
   }
-  else if (recipes.Count == 0)
+  else if (recipes == null || recipes.Count == 0)
   {
-    <p>No recipes yet. <a href="/import">Upload some images to create a recipe.</a></p>
+    <div class="text-center py-5">
+      @if (!string.IsNullOrEmpty(searchQuery))
+      {
+        <h5 class="text-muted">No recipes found for "@searchQuery"</h5>
+        <p>Try a different search term or <a href="/import">import a new recipe</a>.</p>
+      }
+      else
+      {
+        <h5 class="text-muted">No recipes yet</h5>
+        <p><a href="/import">Upload some images to create your first recipe.</a></p>
+      }
+    </div>
   }
   else
   {
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach (var recipe in recipes)
-        {
-          <tr>
-            <td>@recipe.Title</td>
-            <td><a href="/recipe/@recipe.Id" class="btn btn-sm btn-info">View</a></td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      @foreach (var recipe in recipes)
+      {
+        <div class="col">
+          <div class="card h-100 recipe-card" @onclick="() => NavigateToRecipe(recipe.Id)" style="cursor: pointer;">
+            <div class="card-body">
+              <h5 class="card-title">@recipe.Title</h5>
+              
+              @if (recipe.Tags != null && recipe.Tags.Count > 0)
+              {
+                <div class="mb-2">
+                  @foreach (var tag in recipe.Tags.Take(4))
+                  {
+                    <span class="badge bg-secondary me-1">@tag</span>
+                  }
+                  @if (recipe.Tags.Count > 4)
+                  {
+                    <span class="badge bg-light text-dark">+@(recipe.Tags.Count - 4)</span>
+                  }
+                </div>
+              }
+              
+              <p class="card-text text-muted small mb-2">
+                <span class="me-3">@recipe.Ingredients.Count ingredients</span>
+                <span>@recipe.Steps.Count steps</span>
+              </p>
+              
+              @if (!string.IsNullOrEmpty(recipe.Notes))
+              {
+                <p class="card-text small text-muted">@TruncateText(recipe.Notes, 100)</p>
+              }
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <a href="/recipe/@recipe.Id" class="btn btn-sm btn-outline-primary" @onclick:stopPropagation>View Details</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    
+    <div class="text-muted small mt-3">
+      Showing @recipes.Count recipe(s)@(string.IsNullOrEmpty(searchQuery) ? "" : $" matching \"{searchQuery}\"")
+    </div>
   }
 </div>
 
 @code {
-  private List<RecipeDto> recipes = null!;
+  private List<RecipeDto>? recipes;
+  private string searchQuery = "";
+  private bool isLoading = true;
+  private bool isSearching = false;
 
   protected override async Task OnInitializedAsync()
   {
+    await LoadRecipes();
+  }
+
+  private async Task LoadRecipes()
+  {
+    isLoading = true;
+    StateHasChanged();
+    
     try
     {
-      recipes = await Http.GetFromJsonAsync<List<RecipeDto>>("api/recipes") ?? new();
+      var apiUrl = $"{Navigation.BaseUri}api/recipes";
+      recipes = await Http.GetFromJsonAsync<List<RecipeDto>>(apiUrl) ?? new();
     }
     catch
     {
       recipes = new();
     }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task PerformSearch()
+  {
+    isSearching = true;
+    isLoading = true;
+    StateHasChanged();
+    
+    try
+    {
+      var apiUrl = string.IsNullOrWhiteSpace(searchQuery)
+        ? $"{Navigation.BaseUri}api/recipes"
+        : $"{Navigation.BaseUri}api/recipes/search?q={Uri.EscapeDataString(searchQuery)}";
+      
+      recipes = await Http.GetFromJsonAsync<List<RecipeDto>>(apiUrl) ?? new();
+    }
+    catch
+    {
+      recipes = new();
+    }
+    finally
+    {
+      isSearching = false;
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task ClearSearch()
+  {
+    searchQuery = "";
+    await LoadRecipes();
+  }
+
+  private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+  {
+    if (e.Key == "Enter")
+    {
+      await PerformSearch();
+    }
+  }
+
+  private void NavigateToRecipe(Guid id)
+  {
+    Navigation.NavigateTo($"/recipe/{id}");
+  }
+
+  private static string TruncateText(string text, int maxLength)
+  {
+    if (string.IsNullOrEmpty(text) || text.Length <= maxLength) return text;
+    return text[..(maxLength - 3)] + "...";
   }
 }

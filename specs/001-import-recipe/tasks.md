@@ -1,370 +1,253 @@
----
-description: "Task list for Import recipe feature"
----
-
 # Tasks: Import Recipe from Multiple Images
 
-**Feature:** 001-import-recipe  
-**Status:** MVP Phase In Progress (95% Complete)  
-**Last Updated:** 2026-02-21
+**Feature**: 001-import-recipe  
+**Input**: Design documents from `/specs/001-import-recipe/`  
+**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+
+## Format: `[ID] [P?] [Story?] Description`
+
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (US1, US2, US3)
+- Include exact file paths in descriptions
+
+## Path Conventions
+
+Project uses Clean Architecture with:
+- `src/ScreenShotRecipe.Domain/` - Entities, Interfaces
+- `src/ScreenShotRecipe.Application/` - Services
+- `src/ScreenShotRecipe.Application.Contracts/` - DTOs
+- `src/ScreenShotRecipe.Infrastructure/` - Implementations
+- `src/ScreenShotRecipe.Web/` - Blazor Server UI
+- `tests/ScreenShotRecipe.Tests/` - Unit/Integration tests
 
 ---
 
-## Phase 1: Setup & Project Structure ✅ COMPLETE
+## Phase 1: Setup (Shared Infrastructure)
 
-**Goal:** Initialize solution architecture, project structure, and foundational configuration.
+**Purpose**: Missing core entities and image preprocessing
 
-- [x] T001 Create .NET 9 multi-project solution structure (Domain, Application, Application.Contracts, Infrastructure, Web, Tests) — `ScreenShotRecipe.sln` and `src/` directory structure
-- [x] T002 Configure Clean Architecture layers with dependency flow: Domain ← Application ← Infrastructure ← Web — `/src` and project files
-- [x] T003 [P] Initialize Git repository with .gitignore for .NET projects — `.gitignore` at repo root
-- [x] T004 Create Docker & docker-compose setup (multi-stage Dockerfile, override config with `/data` bind mount) — `Dockerfile`, `docker-compose.override.yml`
-- [x] T005 Initialize README with quickstart guide — `README.md`
-
-**Checkpoint:** ✅ Solution scaffolded and builds successfully. All projects created with proper dependencies.
+- [X] T001 Create ImageAsset entity in src/ScreenShotRecipe.Domain/Entities/ImageAsset.cs
+- [X] T002 [P] Create OcrResult entity in src/ScreenShotRecipe.Domain/Entities/OcrResult.cs
+- [X] T003 [P] Create ImportJob entity with ImportJobStatus enum in src/ScreenShotRecipe.Domain/Entities/ImportJob.cs
+- [X] T004 Update Recipe entity to add ImportJobId FK, OverallConfidence, ConfidenceNotes, Version in src/ScreenShotRecipe.Domain/Entities/Recipe.cs
+- [X] T005 [P] Add SixLabors.ImageSharp package to Infrastructure project for image preprocessing
 
 ---
 
-## Phase 2: Foundational Infrastructure ✅ COMPLETE
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**Goal:** Set up database, DI container, storage, and interface contracts that are prerequisites for all user stories.
+**Purpose**: Database schema and core infrastructure that ALL user stories depend on
 
-**Independent Test Criteria:**
-- [] EF Core creates SQLite database on app startup
-- [] Dependency injection resolves all registered services
-- [] File storage writes/reads files from `./data/images/`
-- [] Recipe repository persists and retrieves data from database
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-### Domain Layer
+- [X] T006 Update AppDbContext with DbSets for ImageAsset, OcrResult, ImportJob in src/ScreenShotRecipe.Infrastructure/Persistence/AppDbContext.cs
+- [X] T007 Configure entity relationships and indexes in AppDbContext (Recipe-ImportJob, ImageAsset-OcrResult, cascading deletes)
+- [X] T008 [P] Create OcrResultDto in src/ScreenShotRecipe.Application.Contracts/Dtos/OcrResultDto.cs
+- [X] T009 [P] Create RecipeImportRequestDto with RecipeImageFileDto in src/ScreenShotRecipe.Application.Contracts/Dtos/RecipeImportRequestDto.cs
+- [X] T010 [P] Create RecipeImportResponseDto in src/ScreenShotRecipe.Application.Contracts/Dtos/RecipeImportResponseDto.cs
+- [X] T011 Add IImageAssetRepository interface in src/ScreenShotRecipe.Domain/Interfaces/IImageAssetRepository.cs
+- [X] T012 Add IImportJobRepository interface in src/ScreenShotRecipe.Domain/Interfaces/IImportJobRepository.cs
+- [X] T013 [P] Implement ImageAssetRepository in src/ScreenShotRecipe.Infrastructure/Repositories/ImageAssetRepository.cs
+- [X] T014 [P] Implement ImportJobRepository in src/ScreenShotRecipe.Infrastructure/Repositories/ImportJobRepository.cs
+- [X] T015 Create ImagePreprocessor utility (resize, compress, format conversion) in src/ScreenShotRecipe.Infrastructure/Ocr/ImagePreprocessor.cs
+- [X] T016 Register new repositories and ImagePreprocessor in src/ScreenShotRecipe.Web/Program.cs DI container
 
-- [x] T006 [P] Create Recipe domain entity with Id, Title, Notes, ImportJobId, CreatedAt, UpdatedAt — `src/ScreenShotRecipe.Domain/Entities/Recipe.cs`
-- [x] T007 [P] Create Ingredient domain entity with Id, RawText, Name, Quantity, Unit — `src/ScreenShotRecipe.Domain/Entities/Ingredient.cs`
-- [x] T008 [P] Create Step domain entity with Id, Ordinal, Text — `src/ScreenShotRecipe.Domain/Entities/Step.cs`
-- [x] T009 Define IOcrClient interface (RecognizeAsync method, OcrResult record) — `src/ScreenShotRecipe.Domain/Interfaces/IOcrClient.cs`
-- [x] T010 Define ILLMParser interface (ParseAsync method, ParseResult record with Recipe) — `src/ScreenShotRecipe.Domain/Interfaces/ILLMParser.cs`
-- [x] T011 Define IStorage interface (SaveImageAsync, ReadImageAsync methods) — `src/ScreenShotRecipe.Domain/Interfaces/IStorage.cs`
-- [x] T012 Define IRecipeRepository interface (AddAsync, GetAsync, GetAllAsync methods) — `src/ScreenShotRecipe.Domain/Interfaces/IRecipeRepository.cs`
-
-### Application Layer
-
-- [x] T013 Create RecipeDto in Application.Contracts with Id, Title, Notes, Ingredients[], Steps[], Tags[] — `src/ScreenShotRecipe.Application.Contracts/Dtos/RecipeDto.cs`
-- [x] T014 [P] Create IngredientDto in Application.Contracts — `src/ScreenShotRecipe.Application.Contracts/Dtos/IngredientDto.cs`
-- [x] T015 [P] Create StepDto in Application.Contracts — `src/ScreenShotRecipe.Application.Contracts/Dtos/StepDto.cs`
-
-### Infrastructure Layer
-
-- [x] T016 Create AppDbContext with Recipes DbSet, configure owned entities (Ingredients, Steps) — `src/ScreenShotRecipe.Infrastructure/Persistence/AppDbContext.cs`
-- [x] T017 Configure Tag string conversion in AppDbContext (comma-delimited storage) — `src/ScreenShotRecipe.Infrastructure/Persistence/AppDbContext.cs`
-- [x] T018 Create RecipeRepository implementing IRecipeRepository (AddAsync, GetAsync, GetAllAsync) — `src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs`
-- [x] T019 [P] Create FileSystemStorage implementing IStorage (SaveImageAsync to `./data/images/`, ReadImageAsync) — `src/ScreenShotRecipe.Infrastructure/Storage/FileSystemStorage.cs`
-- [x] T020 [P] Create AzureVisionOcrClient stub (placeholder for real Azure integration) — `src/ScreenShotRecipe.Infrastructure/Ocr/AzureVisionOcrClient.cs`
-- [x] T021 [P] Create AzureOpenAIParser stub (placeholder for real Azure integration) — `src/ScreenShotRecipe.Infrastructure/Parsing/AzureOpenAIParser.cs`
-
-### DI & Configuration
-
-- [x] T022 Wire DI container in Program.cs (DbContext, IRecipeRepository, IStorage, IOcrClient, ILLMParser, ImportService) — `src/ScreenShotRecipe.Web/Program.cs`
-- [x] T023 Add database initialization (EnsureCreated) on app startup — `src/ScreenShotRecipe.Web/Program.cs`
-- [x] T024 Register HttpClient for Blazor component injection — `src/ScreenShotRecipe.Web/Program.cs`
-
-**Checkpoint:** ✅ All foundational infrastructure in place. Database auto-creates on startup. DI wired. Storage functional. Interfaces defined for real service integration.
+**Checkpoint**: Foundation ready - user story implementation can now begin
 
 ---
 
-## Phase 3: US1 - Import Recipe (MVP) 🚧 95% COMPLETE
+## Phase 3: User Story 1 - Import Images and Receive Parsed Recipe (Priority: P1) 🎯 MVP
 
-**User Story:** *"As a user, I want to upload multiple recipe images, extract text via OCR, parse into structured recipe data, and store in the database."*
+**Goal**: User uploads 1-6 images → single Import button → receives structured recipe with images stored
 
-**Success Criteria:**
-- [x] User can navigate to `/import` page
-- [x] File upload form accepts multiple images
-- [x] POST `/api/import` receives multipart form data and processes images
-- [x] Mock OCR extracts deterministic recipe text from images
-- [x] Mock LLM parser converts OCR text → Recipe (ingredients, steps, tags)
-- [x] Recipe saved to SQLite database
-- [x] User sees success confirmation with recipe title, ingredient count, step count
-- [x] User can navigate to recipe detail page from success message
-- [x] GET `/api/recipes` returns list of all imported recipes
-- [x] GET `/api/recipes/{id}` returns single recipe with all fields
+**Independent Test**: Upload 1-6 recipe images, confirm returned recipe has title, ingredients list (≥1), steps (≥1), and original images are retrievable via API
 
-### T1: Fake Services (Mock OCR & LLM)
+### Implementation for User Story 1
 
-- [x] T025 Create FakeOcrClient with deterministic mock recipe text (Chocolate Chip Cookies) — `src/ScreenShotRecipe.Infrastructure/Ocr/FakeOcrClient.cs`
-- [x] T026 [P] Create FakeLLMParser with ingredient/step/tag extraction from OCR text — `src/ScreenShotRecipe.Infrastructure/Parsing/FakeLLMParser.cs`
-- [x] T027 [P] Implement ingredient parsing (quantity, unit, name extraction) in FakeLLMParser — Same file
-- [x] T028 [P] Implement step ordering and title/notes extraction in FakeLLMParser — Same file
-- [x] T029 [P] Implement tag extraction (keyword-based) in FakeLLMParser — Same file
+- [X] T017 [US1] Update ImportService to create ImportJob, store images via IStorage, track status transitions in src/ScreenShotRecipe.Application/Services/ImportService.cs
+- [X] T018 [US1] Add ImportJob status tracking (Queued→OcrInProgress→ParsingInProgress→Succeeded/Failed) to ImportService
+- [X] T019 [US1] Integrate ImagePreprocessor into ImportService to optimize images before extraction
+- [X] T020 [US1] Add confidence metadata handling in ImportService (populate Recipe.OverallConfidence, ConfidenceNotes from extraction result)
+- [X] T021 [US1] Update POST /api/import endpoint to accept multipart form data with multiple images in src/ScreenShotRecipe.Web/Program.cs
+- [X] T022 [US1] Update /api/import endpoint response to return RecipeImportResponseDto (ImportJobId, status, parsed recipe)
+- [X] T023 [US1] Add GET /api/images/{id} endpoint to retrieve stored original images in src/ScreenShotRecipe.Web/Program.cs
+- [X] T024 [US1] Update Import.razor page to show upload progress indicator and import status
+- [X] T025 [US1] Update Import.razor page to display parsed recipe result with confidence badge (green/yellow/red)
+- [X] T026 [US1] Add image thumbnails to Import.razor result showing uploaded images linked to recipe
+- [X] T027 [US1] Add retry logic with exponential backoff to ImportService for transient OCR/extraction failures
+- [X] T028 [US1] Add error handling with ImportJob.ErrorMessage and Diagnostics for permanent failures
 
-### T2: Backend - DI & API Configuration
-
-- [x] T030 Register FakeOcrClient as IOcrClient in DI (default implementation) — `src/ScreenShotRecipe.Web/Program.cs`
-- [x] T031 Register FakeLLMParser as ILLMParser in DI (default implementation) — Same file
-- [ ] T032 Add USE_REAL_SERVICES environment variable for switching to Azure at runtime — Same file (optional for now)
-
-### T3: Backend - API Endpoints
-
-- [x] T033 Implement POST `/api/import` endpoint (reads multipart form, calls ImportService) — `src/ScreenShotRecipe.Web/Program.cs`
-- [x] T034 Implement GET `/api/recipes` endpoint (returns List<RecipeDto>) — Same file
-- [x] T035 Implement GET `/api/recipes/{id}` endpoint (returns RecipeDto or 404) — Same file
-
-### T4: Backend - ImportService Orchestration
-
-- [x] T036 Implement ImportService.ImportImagesAsync() method — `src/ScreenShotRecipe.Application/Services/ImportService.cs`
-- [x] T037 Save uploaded images via IStorage.SaveImageAsync() — Same file
-- [x] T038 Run OCR on each image via IOcrClient.RecognizeAsync() — Same file
-- [x] T039 Concatenate OCR results from all images — Same file
-- [x] T040 Parse concatenated text via ILLMParser.ParseAsync() — Same file
-- [x] T041 Persist Recipe object via IRecipeRepository.AddAsync() — Same file
-- [x] T042 Return RecipeDto with all parsed fields — Same file
-- [x] T043 [P] Handle errors gracefully (return useful error messages) — Same file
-
-### T5: Frontend - Template & Layout
-
-- [x] T044 Create MainLayout.razor with sidebar navigation and content area — `src/ScreenShotRecipe.Web/Shared/MainLayout.razor`
-- [x] T045 Create NavMenu.razor with sidebar navigation (Recipes, Import links) — `src/ScreenShotRecipe.Web/Shared/NavMenu.razor`
-- [x] T046 [P] Create responsive CSS for layout with Bootstrap integration — `src/ScreenShotRecipe.Web/Shared/NavMenu.razor.css`, `src/ScreenShotRecipe.Web/Shared/MainLayout.razor.css`
-- [x] T047 Create wwwroot/index.html with Bootstrap 5 and Bootstrap Icons CDN — `src/ScreenShotRecipe.Web/wwwroot/index.html`
-- [x] T048 Create wwwroot/css/app.css with responsive layout styling — `src/ScreenShotRecipe.Web/wwwroot/css/app.css`
-- [x] T049 Update App.razor to use MainLayout for all routes — `src/ScreenShotRecipe.Web/Shared/App.razor`
-
-### T6: Frontend - Import Page
-
-- [x] T050 Create Import.razor page at `/import` route — `src/ScreenShotRecipe.Web/Pages/Import.razor`
-- [x] T051 Add InputFile component for multi-file selection — Same file
-- [x] T052 Implement file selection handler (OnFilesSelected) — Same file
-- [x] T053 POST selected files to `/api/import` endpoint via HttpClient — Same file
-- [x] T054 Display success/error messages based on API response — Same file
-- [x] T055 Show parsed recipe details (title, ingredient count, step count) on success — Same file
-- [x] T056 Provide link to view imported recipe via `/recipe/{id}` — Same file
-- [x] T057 [P] Add file size validation (reject >5MB files) — Same file
-- [x] T058 [P] Show loading indicator during upload/processing — Same file
-
-### T7: Frontend - Recipe List Page
-
-- [x] T059 Create/Update Recipes.razor page at `/recipes` route — `src/ScreenShotRecipe.Web/Pages/Recipes.razor`
-- [x] T060 Load recipes from GET `/api/recipes` endpoint via HttpClient on page init — Same file
-- [x] T061 Display recipe list in Bootstrap table with Title column — Same file
-- [x] T062 Show "No recipes yet" message when list is empty — Same file
-- [x] T063 Provide link to `/import` page to add first recipe — Same file
-- [x] T064 Provide View button linking to `/recipe/{RecipeId}` for each recipe — Same file
-- [x] T065 [P] Display recipe count and last import date — Same file (optional styling enhancement)
-
-### T8: Frontend - Recipe Detail Page
-
-- [x] T066 Create RecipeDetail.razor page with route `@page "/recipe/{RecipeId:guid}"` — `src/ScreenShotRecipe.Web/Pages/RecipeDetail.razor`
-- [x] T067 Load recipe from GET `/api/recipes/{RecipeId}` endpoint on page init — Same file
-- [x] T068 Display recipe title prominently — Same file
-- [x] T069 Display ingredients list (name, quantity, unit) in card — Same file
-- [x] T070 Display ordered steps (Ordinal, Text) as numbered list — Same file
-- [x] T071 Display tags as Bootstrap badges — Same file
-- [x] T072 [P] Display notes in collapsible section if present — Same file
-- [x] T073 Show loading indicator while fetching data — Same file
-- [x] T074 Show "Recipe not found" message if 404 returned — Same file
-- [x] T075 Provide back link to `/recipes` — Same file
-
-### T9: Testing
-
-- [ ] T076 Create ImportServiceTests with test doubles (mock IOcrClient, ILLMParser, IStorage, IRecipeRepository) — `tests/ScreenShotRecipe.Tests/ImportServiceTests.cs`
-- [ ] T077 Test full import pipeline (images → OCR → parse → storage → RecipeDto) — Same file
-- [ ] T078 [P] Add integration tests for API endpoints (POST /api/import, GET /api/recipes, GET /api/recipes/{id}) — Same file
-- [ ] T079 [P] Add browser-based E2E tests (upload, view, navigate) — `tests/ScreenShotRecipe.Tests/` (if using Playwright/Selenium)
-
-**Checkpoint:** 🚧 **MVP FUNCTIONAL** — Full end-to-end import workflow complete. All pages created with template layout. API endpoints tested. Fake services provide deterministic results. Ready for user testing and real UI refinement.
+**Checkpoint**: User Story 1 complete - users can import recipe images and receive structured recipes
 
 ---
 
-## Phase 4: US2 - Browse & Search 📋 NOT STARTED
+## Phase 4: User Story 2 - Browse, View and Search Recipes (Priority: P2)
 
-**User Story:** *"As a user, I want to search recipes by title, ingredient, or tag and filter results."*
+**Goal**: User can browse saved recipes, search by title/ingredient/tag, open recipe to see details and original images
 
-**Success Criteria:**
-- [ ] GET `/api/recipes?q=search_term` returns filtered results
-- [ ] Search works on recipe title, ingredient names, and tags
-- [ ] Recipes.razor includes search input field with real-time filtering
-- [ ] Results update as user types (debounced)
-- [ ] Display recipe count and last import date
+**Independent Test**: Create several recipes, search for "chocolate", verify matching recipes returned; open a recipe, verify fields and images display
 
-| Task ID | Priority | Status | Description | File Path |
-|---------|----------|--------|-------------|-----------|
-| T080 | P1 | ⏳ | Add search query parameter support to GET `/api/recipes` | `src/ScreenShotRecipe.Web/Program.cs` |
-| T081 | [P] | ⏳ | Implement SearchAsync method in RecipeRepository | `src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs` |
-| T082 | [P] | ⏳ | Add search input field to Recipes.razor | `src/ScreenShotRecipe.Web/Pages/Recipes.razor` |
-| T083 | [P] | ⏳ | Implement search handler with debouncing | Same file |
+### Implementation for User Story 2
 
----
+- [X] T029 [US2] Add SearchAsync method to IRecipeRepository (query title, ingredient names, tags) in src/ScreenShotRecipe.Domain/Interfaces/IRecipeRepository.cs
+- [X] T030 [US2] Implement SearchAsync in RecipeRepository with relevance ranking in src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs
+- [X] T031 [US2] Add GET /api/recipes/search?q={query} endpoint in src/ScreenShotRecipe.Web/Program.cs
+- [X] T032 [US2] Update Recipes.razor page with search input box and search button in src/ScreenShotRecipe.Web/Pages/Recipes.razor
+- [X] T033 [US2] Add search results display with recipe cards (title, tags as pills, confidence badge, created date)
+- [X] T034 [US2] Update RecipeDetail.razor to display all recipe fields with proper formatting (ingredients with qty/unit, numbered steps)
+- [X] T035 [US2] Add image gallery to RecipeDetail.razor showing original imported images as thumbnails
+- [X] T036 [US2] Add image lightbox/modal component for viewing full-size images
+- [X] T037 [US2] Add loading states and empty state messages ("No recipes found") to Recipes.razor and RecipeDetail.razor
 
-## Phase 5: US3 - Edit Recipe 📝 NOT STARTED
-
-**User Story:** *"As a user, I want to edit recipe details (title, ingredients, steps, tags) after importing."*
-
-**Success Criteria:**
-- [ ] RecipeDetail page includes Edit button/link
-- [ ] Edit form allows modifying title, ingredients (add/remove), steps, tags
-- [ ] PUT `/api/recipes/{id}` endpoint updates recipe in database
-- [ ] Success message on save, option to return to detail view
-- [ ] Validation prevents empty titles or steps
-
-| Task ID | Priority | Status | Description | File Path |
-|---------|----------|--------|-------------|-----------|
-| T084 | P2 | ⏳ | Create EditRecipe.razor page | `src/ScreenShotRecipe.Web/Pages/EditRecipe.razor` |
-| T085 | P2 | ⏳ | Load recipe from API on page init | Same file |
-| T086 | [P] | ⏳ | Implement form binding for title, notes, ingredients, steps, tags | Same file |
-| T087 | [P] | ⏳ | Add delete ingredient/step buttons (dynamic list) | Same file |
-| T088 | [P] | ⏳ | POST edited recipe to PUT `/api/recipes/{id}` | Same file |
-| T089 | P2 | ⏳ | Add UpdateAsync method to IRecipeRepository and RecipeRepository | `src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs` |
-| T090 | P2 | ⏳ | Implement PUT `/api/recipes/{id}` endpoint in Program.cs | `src/ScreenShotRecipe.Web/Program.cs` |
-| T091 | P2 | ⏳ | Add delete recipe endpoint DELETE `/api/recipes/{id}` | Same file |
+**Checkpoint**: User Story 2 complete - users can browse and search recipes, view full details with images
 
 ---
 
-## Phase 6: Polish & Production 🎨 NOT STARTED
+## Phase 5: User Story 3 - Manual Review and Edit After Import (Priority: P3)
 
-| Task ID | Priority | Status | Description | File Path |
-|---------|----------|--------|-------------|-----------|
-| T092 | P2 | ⏳ | Add error handling middleware (logs exceptions, returns friendly messages) | `src/ScreenShotRecipe.Web/Program.cs` |
-| T093 | [P] | ⏳ | Implement file size validation (max 5MB per image) | `src/ScreenShotRecipe.Web/Pages/Import.razor` |
-| T094 | [P] | ⏳ | Add loading indicators to form submissions | Same file |
-| T095 | P2 | ⏳ | Create data seeding for demo recipes | `src/ScreenShotRecipe.Infrastructure/Persistence/AppDbContext.cs` |
-| T096 | P3 | ⏳ | Set up GitHub Actions CI/CD pipeline (build, test, publish) | `.github/workflows/build.yml` |
-| T097 | P3 | ⏳ | Document real Azure Vision OCR integration pattern | `docs/AZURE_INTEGRATION.md` |
-| T098 | P3 | ⏳ | Document real Azure OpenAI LLM integration pattern | Same file |
-| T099 | P3 | ⏳ | Write architecture decision records (ADRs) | `docs/adr/` |
+**Goal**: User can edit recipe fields (title, ingredients, steps, tags) and save changes while keeping original images
 
----
+**Independent Test**: Import a recipe, edit title and add an ingredient, save; verify changes persist and appear in search
 
-## Task Dependency Graph
+### Implementation for User Story 3
 
-```
-Phase 1: Setup
-    ↓
-Phase 2: Foundation (Blocking)
-    - T006-T024 (all core infrastructure)
-    ↓
-Phase 3: MVP/US1 (Parallel execution within phase)
-    - T025-T031: Fake Services (parallel after T002)
-    - T032-T035: API Endpoints (parallel after T006-T008)
-    - T036-T043: ImportService (after T025-T031)
-    - T044-T049: Layout & Template (parallel)
-    - T050-T058: Import Page (after T032-T035)
-    - T059-T065: Recipes List (after T034-T035)
-    - T066-T075: Recipe Detail (after T034-T035)
-    - T076-T079: Testing (after core features)
-    ↓
-Phase 4: US2 Search (Independent after MVP)
-    - T080-T083
-    ↓
-Phase 5: US3 Edit (Independent after MVP)
-    - T084-T091
-    ↓
-Phase 6: Polish & Prod (Independent)
-    - T092-T099
-```
+- [X] T038 [US3] Add UpdateAsync method to IRecipeRepository with version increment in src/ScreenShotRecipe.Domain/Interfaces/IRecipeRepository.cs
+- [X] T039 [US3] Implement UpdateAsync in RecipeRepository with optimistic concurrency check in src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs
+- [X] T040 [US3] Add PUT /api/recipes/{id} endpoint for recipe updates in src/ScreenShotRecipe.Web/Program.cs
+- [X] T041 [US3] Create RecipeEditDto for update requests in src/ScreenShotRecipe.Application.Contracts/Dtos/RecipeEditDto.cs
+- [X] T042 [US3] Create RecipeEdit.razor page with editable form in src/ScreenShotRecipe.Web/Pages/RecipeEdit.razor
+- [X] T043 [US3] Implement title editing with validation (required, max 500 chars) in RecipeEdit.razor
+- [X] T044 [US3] Implement ingredients editing (add, remove, reorder, edit quantity/unit/name) with inline forms
+- [X] T045 [US3] Implement steps editing (add, remove, reorder, edit text) with inline forms
+- [X] T046 [US3] Implement tags editing (add tag pill, remove tag) with autocomplete
+- [X] T047 [US3] Add Save and Cancel buttons with unsaved changes confirmation dialog
+- [X] T048 [US3] Add low-confidence field highlighting in edit form (yellow border for confidence < 0.7)
+- [X] T049 [US3] Increment Recipe.Version on save and show concurrency conflict error if version mismatch
+
+**Checkpoint**: User Story 3 complete - users can edit and correct parsed recipes
 
 ---
 
-## Parallel Execution Strategy
+## Phase 6: Polish & Cross-Cutting Concerns
 
-### Phase 3 Parallelization
-**Within a single developer:**
-1. **Start Fake Services (T025-T031)** immediately after Phase 2
-2. **Start API Endpoints (T032-T035)** in parallel, they don't depend on fake services being complete
-3. **Start Layout & Template (T044-T049)** immediately (independent)
-4. **Start Frontend Pages (T050-T075)** once Layout is done
-5. **ImportService (T036-T043)** depends on fake services + API endpoints being defined
+**Purpose**: Improvements that affect multiple user stories
 
-**Across multiple developers (if applicable):**
-- Developer A: Fake services + ImportService + API implementation
-- Developer B: Layout + All Razor pages in parallel
-- Developer C: Testing + E2E validation
-
----
-
-## Current Status
-
-| Phase | Tasks | Complete | Status |
-|-------|-------|----------|--------|
-| 1: Setup | 5 | 5 ✅ | **COMPLETE** |
-| 2: Foundation | 19 | 19 ✅ | **COMPLETE** |
-| 3: MVP/US1 | 31 | 30 | **95% - 1 TASK REMAINING** |
-| 4: US2 Search | 4 | 0 | Not Started |
-| 5: US3 Edit | 8 | 0 | Not Started |
-| 6: Polish | 8 | 0 | Not Started |
-| **TOTAL** | **75** | **54** | **72% Complete** |
-
-### Phase 3 Remaining Work
-- [ ] T076-T079: Unit/integration/E2E tests (optional for MVP but recommended)
-
-### MVP Definition
-**Minimum Viable Product (MVP) = Phases 1, 2, 3 (except testing)**
-- ✅ Scaffolding complete
-- ✅ Infrastructure in place
-- ✅ Full import workflow functional (image → OCR → parse → store)
-- ✅ API endpoints working
-- ✅ Template-based UI with sidebar navigation
-- ✅ All pages created and responsive
-- ⏳ Testing (nice-to-have for MVP)
-
-**Status: MVP is 95% complete and FUNCTIONAL. Ready for deployment and user testing.**
-
----
-
-## Next Immediate Actions
-
-1. **[OPTIONAL] Complete MVP Testing (T076-T079)** — Recommended for stability
-2. **[NEXT FEATURE] Start Phase 4: Search** — Add query parameter support and search UI
-3. **[FUTURE] Start Phase 5: Edit** — Enable recipe modifications
-4. **[FUTURE] Phase 6: Production** — Polish UI, add CI/CD, integrate real Azure services
-
-
----
-
-## Phase 4: User Story 2 - Browse, view and search recipes (Priority: P2)
-
-**Goal**: Browse and search stored recipes; view parsed fields and original images.
-
-- [ ] T020 [US2] Add Blazor page for recipe list and search at `src/ScreenShotRecipe.Web/Pages/Recipes.razor`
-- [ ] T021 [US2] Implement recipe detail page `src/ScreenShotRecipe.Web/Pages/RecipeDetail.razor` to show structured fields and image viewer
-- [ ] T022 [US2] Implement Minimal API `GET /api/recipes/{id}` and `GET /api/recipes` endpoints in `src/ScreenShotRecipe.Web/Program.cs`
-- [ ] T023 [US2] Add repository queries for search and paging in `src/ScreenShotRecipe.Infrastructure/Repositories/RecipeRepository.cs`
-
----
-
-## Phase 5: User Story 3 - Manual review and edit after import (Priority: P3)
-
-**Goal**: Allow users to edit parsed fields and persist changes while maintaining links to original images.
-
-- [ ] T024 [US3] Add edit UI components `src/ScreenShotRecipe.Web/Pages/EditRecipe.razor`
-- [ ] T025 [US3] Implement `PUT /api/recipes/{id}` endpoint to persist edits and record basic audit info in `src/ScreenShotRecipe.Web/Program.cs`
-- [ ] T026 [US3] Add lightweight audit trail storage (e.g., JSON blobs or Audit table) in `src/ScreenShotRecipe.Infrastructure/Persistence`
-
----
-
-## Phase N: Polish & Cross-Cutting Concerns
-
-- [ ] T027 [P] Documentation updates: update `specs/001-import-recipe/quickstart.md` and root `README.md` with run instructions and architecture notes
-- [ ] T028 [P] Add CI workflow (GitHub Actions) to run `dotnet build` and `dotnet test` on PRs - `.github/workflows/ci.yml`
-- [ ] T029 [P] Add real Azure integrations and secure configuration: add `appsettings.json` + secrets guidance and environment variable usage for Azure keys
-- [ ] T030 [P] Add optional production configuration for running in LXC on Proxmox (docker-compose, systemd helper docs)
+- [X] T050 [P] Add DataAnnotations validation to all DTOs per validation rules in contracts/DTOs-and-Contracts.md
+- [X] T051 [P] Add structured logging throughout ImportService, repositories, and extraction services using Serilog
+- [X] T052 [P] Add GET /health endpoint for API health check in src/ScreenShotRecipe.Web/Program.cs
+- [X] T056 [P] Add DELETE /api/recipes/{id} endpoint in src/ScreenShotRecipe.Web/Program.cs
+- [X] T057 [P] Add delete button with confirmation modal to RecipeDetail.razor in src/ScreenShotRecipe.Web/Pages/RecipeDetail.razor
+- [X] T058 [P] Add print recipe functionality with clean printable output (hide nav/buttons) in RecipeDetail.razor
+- [X] T059 [P] Add print CSS styles (@media print) to hide app chrome in src/ScreenShotRecipe.Web/wwwroot/css/app.css
+- [X] T060 [P] Fix NavMenu link contrast (white text, better hover states) in src/ScreenShotRecipe.Web/Shared/NavMenu.razor.css
+- [X] T061 [P] Update Helpers/RunWeb.bat to set ASPNETCORE_ENVIRONMENT=Development for user secrets
+- [ ] T053 [P] Update quickstart.md with current fake vs real service configuration in specs/001-import-recipe/quickstart.md
+- [ ] T054 Run end-to-end test: upload images → verify import → search → view → edit → delete → verify persistence
+- [ ] T055 Performance validation: verify import of 6 images completes within 30 seconds per SC-002
 
 ---
 
 ## Dependencies & Execution Order
 
-- **Setup (Phase 1)**: No dependencies; complete first
-- **Foundational (Phase 2)**: Depends on Setup completion; blocks all user stories
-- **User Stories (Phase 3+)**: Depend on Foundational; once foundational is complete, stories can be implemented in parallel where tasks are marked `[P]`
+### Phase Dependencies
 
-### Story Dependencies
-- **US1 (P1)**: Blocks US2/US3; must implement Import pipeline first
-- **US2 (P2)**: Depends on US1 foundational persistence (recipes exist)
-- **US3 (P3)**: Depends on US1/US2 for data structures and UI
+- **Phase 1 (Setup)**: No dependencies - can start immediately
+- **Phase 2 (Foundational)**: Depends on Phase 1 completion - BLOCKS all user stories
+- **Phase 3-5 (User Stories)**: All depend on Phase 2 completion
+  - US1 (P1): Can start immediately after Phase 2
+  - US2 (P2): Can start after Phase 2, independent of US1 (can use seed data)
+  - US3 (P3): Can start after Phase 2, may reuse RecipeDetail.razor patterns
+- **Phase 6 (Polish)**: Depends on desired user stories being complete
 
-## Parallel Execution Examples
+### User Story Dependencies
 
-- Team A: Implement `FileSystemStorage` (T012) and `IRecipeRepository` (T017) in parallel
-- Team B: Implement `IOcrClient` stub (T013) and `ILLMParser` stub (T014) in parallel
-- Team C: Implement `ImportService` (T015) and unit tests (T018)
+- **User Story 1 (P1)**: After Phase 2 - core import flow, no cross-story dependencies
+- **User Story 2 (P2)**: After Phase 2 - uses Recipe entities but independently testable with seed data
+- **User Story 3 (P3)**: After Phase 2 - builds on viewing patterns from US2 but edit form is independent
+
+### Within Each User Story
+
+- T017-T028 (US1): ImportService → API endpoints → UI pages
+- T029-T037 (US2): Repository search → API endpoint → UI components
+- T038-T049 (US3): Repository update → API endpoint → Edit UI
+
+### Parallel Opportunities
+
+**Phase 1** (tasks marked [P]):
+- T001, T002, T003 can run in parallel (different entity files)
+- T004 depends on T003 (ImportJob must exist for FK)
+- T005 can run in parallel with all
+
+**Phase 2** (tasks marked [P]):
+- T008, T009, T010 can run in parallel (different DTO files)
+- T011, T012 can run in parallel (different interface files)
+- T013, T014 can run in parallel (different repository files)
+- T006, T007 must complete before T013, T014
+
+**User Stories** (after Phase 2):
+- US1, US2, US3 can proceed in parallel on separate branches
+- Within each story, tasks are generally sequential (backend → frontend)
+
+---
+
+## Parallel Example: Phase 1 + Phase 2
+
+```bash
+# Phase 1 - Launch entity creation in parallel:
+T001: Create ImageAsset entity
+T002: Create OcrResult entity  
+T003: Create ImportJob entity
+T005: Add ImageSharp package
+# Then T004 (update Recipe FK)
+
+# Phase 2 - Launch DTOs and interfaces in parallel:
+T008: Create OcrResultDto
+T009: Create RecipeImportRequestDto
+T010: Create RecipeImportResponseDto
+T011: Create IImageAssetRepository interface
+T012: Create IImportJobRepository interface
+
+# After T006, T007 (DbContext):
+T013: Implement ImageAssetRepository
+T014: Implement ImportJobRepository
+```
+
+---
 
 ## Implementation Strategy
 
-1. MVP first: Complete Phase 1 + Phase 2 + US1 (T001-T019). Validate via the independent test (POST to `/api/import`).
-2. Incrementally add US2 (browse/search) and US3 (edit) while keeping DI and contracts stable.
-3. Swap stubs for real Azure integrations (T029) after MVP.
+### MVP First (User Story 1 Only)
+
+1. Complete Phase 1: Setup (T001-T005) - ~5 tasks
+2. Complete Phase 2: Foundational (T006-T016) - ~11 tasks
+3. Complete Phase 3: User Story 1 (T017-T028) - ~12 tasks
+4. **STOP and VALIDATE**: Test import flow end-to-end with fake service
+5. Deploy/demo - users can import recipes!
+
+### Incremental Delivery
+
+1. Setup + Foundational → Foundation ready (16 tasks)
+2. US1 (Import) → Test → **MVP deployed!** (28 tasks total)
+3. US2 (Browse/Search) → Test → Deploy v2 (37 tasks total)
+4. US3 (Edit) → Test → Deploy v3 (49 tasks total)
+5. Polish → Final quality pass (61 tasks total)
+
+---
+
+## Summary
+
+| Phase | Tasks | Count | Purpose |
+|-------|-------|-------|---------|
+| Phase 1 | T001-T005 | 5 | Entity setup, ImageSharp |
+| Phase 2 | T006-T016 | 11 | Foundation (DB, DTOs, repos) |
+| Phase 3 | T017-T028 | 12 | US1: Import images → recipe |
+| Phase 4 | T029-T037 | 9 | US2: Browse, search, view |
+| Phase 5 | T038-T049 | 12 | US3: Edit recipes |
+| Phase 6 | T050-T061 | 12 | Polish, delete, print, UI fixes |
+
+**Total Tasks**: 61  
+**Completed**: 58  
+**Remaining**: 3 (T053, T054, T055)  
+**Per User Story**: US1=12, US2=9, US3=12  
+**MVP Scope**: Phases 1-3 (28 tasks)  
+**Parallel Opportunities**: Phases 1-2 have high parallelism; US phases are sequential within but parallel across stories

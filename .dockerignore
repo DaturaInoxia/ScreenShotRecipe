@@ -1,0 +1,58 @@
+# Git
+.git/
+.gitignore
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# IDE and editor files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+
+# Test results
+**/TestResults/
+coverage/
+*.trx
+
+# Documentation and specs (not needed in container)
+*.md
+specs/
+docs/
+README*
+CHANGELOG*
+
+# Docker files themselves
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Environment and secret files
+.env*
+secrets.json
+**/appsettings.Development.json
+
+# SQLite databases (will create fresh in container)
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Logs
+[Ll]ogs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NuGet packages (restored during build)
+packages/
+
+# Test images (for development testing only)
+test_images/

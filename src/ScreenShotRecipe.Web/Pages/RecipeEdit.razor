@@ -1,0 +1,468 @@
+@page "/recipe/{RecipeId:guid}/edit"
+@rendermode InteractiveServer
+@using ScreenShotRecipe.Application.Contracts.Dtos
+@using System.Text.Json
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ILogger<RecipeEdit> Logger
+
+<div class="container mt-4">
+  @if (isLoading)
+  {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading recipe...</p>
+    </div>
+  }
+  else if (recipe == null)
+  {
+    <div class="alert alert-warning">
+      <h5>Recipe not found</h5>
+      <p>The recipe you're trying to edit doesn't exist or may have been deleted.</p>
+    </div>
+    <a href="/recipes" class="btn btn-secondary">Back to Recipes</a>
+  }
+  else
+  {
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Edit Recipe</h1>
+      <div>
+        <button class="btn btn-outline-secondary me-2" @onclick="CancelEdit" disabled="@isSaving">Cancel</button>
+        <button class="btn btn-primary" @onclick="SaveRecipe" disabled="@isSaving">
+          @if (isSaving)
+          {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <span>Saving...</span>
+          }
+          else
+          {
+            <span>Save Changes</span>
+          }
+        </button>
+      </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+      </div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" @onclick="() => successMessage = null"></button>
+      </div>
+    }
+
+    <form>
+      @* Title *@
+      <div class="mb-3">
+        <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+        <input type="text" 
+               class="form-control @(string.IsNullOrWhiteSpace(recipe.Title) ? "is-invalid" : "") @GetLowConfidenceClass()"
+               id="title" 
+               @bind="recipe.Title" 
+               maxlength="500" />
+        <div class="invalid-feedback">Title is required</div>
+        <div class="form-text">@recipe.Title.Length / 500 characters</div>
+      </div>
+
+      @* Notes *@
+      <div class="mb-3">
+        <label for="notes" class="form-label">Notes</label>
+        <textarea class="form-control" 
+                  id="notes" 
+                  rows="3" 
+                  @bind="recipe.Notes"></textarea>
+      </div>
+
+      @* Tags *@
+      <div class="mb-4">
+        <label class="form-label">Tags</label>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          @foreach (var tag in recipe.Tags)
+          {
+            <span class="badge bg-secondary d-flex align-items-center gap-1">
+              @tag
+              <button type="button" class="btn-close btn-close-white" style="font-size: 0.5rem;" @onclick="() => RemoveTag(tag)"></button>
+            </span>
+          }
+        </div>
+        <div class="input-group" style="max-width: 300px;">
+          <input type="text" class="form-control" placeholder="Add tag..." @bind="newTag" @onkeydown="HandleTagKeyDown" />
+          <button class="btn btn-outline-secondary" type="button" @onclick="AddTag">Add</button>
+        </div>
+      </div>
+
+      @* Ingredients *@
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Ingredients</h5>
+          <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddIngredient">+ Add Ingredient</button>
+        </div>
+        <div class="card-body">
+          @if (recipe.Ingredients.Count == 0)
+          {
+            <p class="text-muted">No ingredients. Click "Add Ingredient" to add one.</p>
+          }
+          else
+          {
+            <div class="list-group list-group-flush">
+              @for (int i = 0; i < recipe.Ingredients.Count; i++)
+              {
+                var index = i;
+                var ingredient = recipe.Ingredients[index];
+                <div class="list-group-item px-0">
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                      <label class="form-label small">Quantity</label>
+                      <input type="text" class="form-control form-control-sm" @bind="ingredient.Quantity" placeholder="e.g., 2" />
+                    </div>
+                    <div class="col-md-2">
+                      <label class="form-label small">Unit</label>
+                      <input type="text" class="form-control form-control-sm" @bind="ingredient.Unit" placeholder="e.g., cups" />
+                    </div>
+                    <div class="col-md-5">
+                      <label class="form-label small">Name</label>
+                      <input type="text" class="form-control form-control-sm" @bind="ingredient.Name" placeholder="e.g., flour" />
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => RemoveIngredient(index)">Remove</button>
+                    </div>
+                  </div>
+                  @if (!string.IsNullOrEmpty(ingredient.RawText) && ingredient.RawText != $"{ingredient.Quantity} {ingredient.Unit} {ingredient.Name}".Trim())
+                  {
+                    <small class="text-muted d-block mt-1">Original: @ingredient.RawText</small>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @* Steps *@
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Steps</h5>
+          <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AddStep">+ Add Step</button>
+        </div>
+        <div class="card-body">
+          @if (recipe.Steps.Count == 0)
+          {
+            <p class="text-muted">No steps. Click "Add Step" to add one.</p>
+          }
+          else
+          {
+            <div class="list-group list-group-flush">
+              @for (int i = 0; i < recipe.Steps.Count; i++)
+              {
+                var index = i;
+                var step = recipe.Steps[index];
+                <div class="list-group-item px-0">
+                  <div class="d-flex gap-2 align-items-start">
+                    <span class="badge bg-secondary mt-2">@step.Ordinal</span>
+                    <div class="flex-grow-1">
+                      <textarea class="form-control form-control-sm" 
+                                rows="2" 
+                                @bind="step.Text" 
+                                placeholder="Enter step instructions..."></textarea>
+                    </div>
+                    <div class="d-flex flex-column gap-1">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => MoveStepUp(index)" disabled="@(index == 0)">↑</button>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => MoveStepDown(index)" disabled="@(index == recipe.Steps.Count - 1)">↓</button>
+                      <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => RemoveStep(index)">✕</button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @* Version info *@
+      <div class="text-muted small mb-3">
+        Version: @recipe.Version
+        @if (originalRecipe?.OverallConfidence.HasValue == true)
+        {
+          <span class="ms-3">Original Confidence: @($"{originalRecipe.OverallConfidence.Value:P0}")</span>
+        }
+      </div>
+    </form>
+  }
+</div>
+
+@* Unsaved changes confirmation *@
+@if (showUnsavedConfirm)
+{
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Unsaved Changes</h5>
+          <button type="button" class="btn-close" @onclick="() => showUnsavedConfirm = false"></button>
+        </div>
+        <div class="modal-body">
+          <p>You have unsaved changes. Are you sure you want to leave?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @onclick="() => showUnsavedConfirm = false">Stay</button>
+          <button type="button" class="btn btn-danger" @onclick="ConfirmLeave">Leave Without Saving</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@code {
+  [Parameter]
+  public Guid RecipeId { get; set; }
+
+  private RecipeEditDto? recipe;
+  private RecipeDto? originalRecipe;
+  private bool isLoading = true;
+  private bool isSaving = false;
+  private string? errorMessage;
+  private string? successMessage;
+  private string newTag = "";
+  private bool showUnsavedConfirm = false;
+  private bool hasUnsavedChanges = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadRecipe();
+  }
+
+  private async Task LoadRecipe()
+  {
+    isLoading = true;
+    try
+    {
+      var apiUrl = $"{Navigation.BaseUri}api/recipes/{RecipeId}";
+      originalRecipe = await Http.GetFromJsonAsync<RecipeDto>(apiUrl);
+      
+      if (originalRecipe != null)
+      {
+        recipe = new RecipeEditDto
+        {
+          Id = originalRecipe.Id,
+          Title = originalRecipe.Title,
+          Notes = originalRecipe.Notes,
+          Tags = originalRecipe.Tags?.ToList() ?? new List<string>(),
+          Version = originalRecipe.Version,
+          Ingredients = originalRecipe.Ingredients.Select(i => new IngredientEditDto
+          {
+            RawText = i.RawText,
+            Name = i.Name,
+            Quantity = i.Quantity,
+            Unit = i.Unit
+          }).ToList(),
+          Steps = originalRecipe.Steps.Select(s => new StepEditDto
+          {
+            Ordinal = s.Ordinal,
+            Text = s.Text
+          }).ToList()
+        };
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error loading recipe for edit: {RecipeId}", RecipeId);
+      errorMessage = $"Error loading recipe: {ex.Message}";
+    }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task SaveRecipe()
+  {
+    if (recipe == null) return;
+    
+    if (string.IsNullOrWhiteSpace(recipe.Title))
+    {
+      errorMessage = "Title is required";
+      return;
+    }
+
+    isSaving = true;
+    errorMessage = null;
+    successMessage = null;
+    StateHasChanged();
+
+    try
+    {
+      var apiUrl = $"{Navigation.BaseUri}api/recipes/{RecipeId}";
+      var response = await Http.PutAsJsonAsync(apiUrl, recipe);
+
+      if (response.IsSuccessStatusCode)
+      {
+        var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        if (result != null && result.TryGetValue("version", out var newVersion))
+        {
+          recipe.Version = Convert.ToInt32(newVersion);
+        }
+        successMessage = "Recipe saved successfully!";
+        hasUnsavedChanges = false;
+      }
+      else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+      {
+        errorMessage = "This recipe was modified by another user. Please reload and try again.";
+      }
+      else
+      {
+        var error = await response.Content.ReadAsStringAsync();
+        errorMessage = $"Failed to save: {error}";
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error saving recipe: {RecipeId}", RecipeId);
+      errorMessage = $"Error saving recipe: {ex.Message}";
+    }
+    finally
+    {
+      isSaving = false;
+      StateHasChanged();
+    }
+  }
+
+  private void CancelEdit()
+  {
+    if (hasUnsavedChanges)
+    {
+      showUnsavedConfirm = true;
+    }
+    else
+    {
+      Navigation.NavigateTo($"/recipe/{RecipeId}");
+    }
+  }
+
+  private void ConfirmLeave()
+  {
+    showUnsavedConfirm = false;
+    Navigation.NavigateTo($"/recipe/{RecipeId}");
+  }
+
+  private void AddIngredient()
+  {
+    recipe?.Ingredients.Add(new IngredientEditDto
+    {
+      RawText = "",
+      Name = "",
+      Quantity = "",
+      Unit = ""
+    });
+    hasUnsavedChanges = true;
+  }
+
+  private void RemoveIngredient(int index)
+  {
+    if (recipe != null && index >= 0 && index < recipe.Ingredients.Count)
+    {
+      recipe.Ingredients.RemoveAt(index);
+      hasUnsavedChanges = true;
+    }
+  }
+
+  private void AddStep()
+  {
+    if (recipe == null) return;
+    
+    var nextOrdinal = recipe.Steps.Count > 0 ? recipe.Steps.Max(s => s.Ordinal) + 1 : 1;
+    recipe.Steps.Add(new StepEditDto
+    {
+      Ordinal = nextOrdinal,
+      Text = ""
+    });
+    hasUnsavedChanges = true;
+  }
+
+  private void RemoveStep(int index)
+  {
+    if (recipe == null || index < 0 || index >= recipe.Steps.Count) return;
+    
+    recipe.Steps.RemoveAt(index);
+    // Renumber remaining steps
+    for (int i = 0; i < recipe.Steps.Count; i++)
+    {
+      recipe.Steps[i].Ordinal = i + 1;
+    }
+    hasUnsavedChanges = true;
+  }
+
+  private void MoveStepUp(int index)
+  {
+    if (recipe == null || index <= 0) return;
+    
+    var temp = recipe.Steps[index];
+    recipe.Steps[index] = recipe.Steps[index - 1];
+    recipe.Steps[index - 1] = temp;
+    
+    // Update ordinals
+    recipe.Steps[index].Ordinal = index + 1;
+    recipe.Steps[index - 1].Ordinal = index;
+    hasUnsavedChanges = true;
+  }
+
+  private void MoveStepDown(int index)
+  {
+    if (recipe == null || index >= recipe.Steps.Count - 1) return;
+    
+    var temp = recipe.Steps[index];
+    recipe.Steps[index] = recipe.Steps[index + 1];
+    recipe.Steps[index + 1] = temp;
+    
+    // Update ordinals
+    recipe.Steps[index].Ordinal = index + 1;
+    recipe.Steps[index + 1].Ordinal = index + 2;
+    hasUnsavedChanges = true;
+  }
+
+  private void AddTag()
+  {
+    if (recipe == null || string.IsNullOrWhiteSpace(newTag)) return;
+    
+    var tag = newTag.Trim();
+    if (!recipe.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+    {
+      recipe.Tags.Add(tag);
+      hasUnsavedChanges = true;
+    }
+    newTag = "";
+  }
+
+  private void RemoveTag(string tag)
+  {
+    recipe?.Tags.Remove(tag);
+    hasUnsavedChanges = true;
+  }
+
+  private void HandleTagKeyDown(KeyboardEventArgs e)
+  {
+    if (e.Key == "Enter")
+    {
+      AddTag();
+    }
+  }
+
+  private string GetLowConfidenceClass()
+  {
+    if (originalRecipe?.OverallConfidence.HasValue == true && originalRecipe.OverallConfidence.Value < 0.7m)
+    {
+      return "border-warning";
+    }
+    return "";
+  }
+}

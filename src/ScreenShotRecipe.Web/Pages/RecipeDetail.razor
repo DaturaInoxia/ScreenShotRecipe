@@ -1,61 +1,112 @@
 @page "/recipe/{RecipeId:guid}"
+@rendermode InteractiveServer
 @using ScreenShotRecipe.Application.Contracts.Dtos
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="container mt-4">
   @if (isLoading)
   {
-    <p><em>Loading recipe...</em></p>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading recipe...</p>
+    </div>
   }
   else if (recipe == null)
   {
-    <div class="alert alert-warning">Recipe not found.</div>
+    <div class="alert alert-warning">
+      <h5>Recipe not found</h5>
+      <p>The recipe you're looking for doesn't exist or may have been deleted.</p>
+    </div>
     <a href="/recipes" class="btn btn-secondary">Back to Recipes</a>
   }
   else
   {
-    <h1>@recipe.Title</h1>
-    <a href="/recipes" class="btn btn-secondary mb-3">Back to Recipes</a>
+    <div class="d-flex justify-content-between align-items-start mb-3 no-print">
+      <div>
+        <h1>@recipe.Title</h1>
+        @if (recipe.OverallConfidence.HasValue)
+        {
+          <span class="@GetConfidenceBadgeClass()">
+            Confidence: @($"{recipe.OverallConfidence.Value:P0}")
+          </span>
+          @if (!string.IsNullOrEmpty(recipe.ConfidenceNotes))
+          {
+            <small class="text-muted d-block mt-1">@recipe.ConfidenceNotes</small>
+          }
+        }
+      </div>
+      <div>
+        <button class="btn btn-outline-success me-2" @onclick="PrintRecipe" title="Print Recipe">
+          <span class="bi bi-printer me-1"></span>Print
+        </button>
+        <a href="/recipes" class="btn btn-outline-secondary me-2">Back to Recipes</a>
+        <a href="/recipe/@recipe.Id/edit" class="btn btn-outline-primary me-2">Edit</a>
+        <button class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation" title="Delete Recipe">
+          <span class="bi bi-trash me-1"></span>Delete
+        </button>
+      </div>
+    </div>
+
+    @* Print-only header *@
+    <div class="print-only">
+      <h1 class="print-title">@recipe.Title</h1>
+    </div>
+
+    @if (recipe.Tags != null && recipe.Tags.Count > 0)
+    {
+      <div class="mb-3">
+        @foreach (var tag in recipe.Tags)
+        {
+          <span class="badge bg-secondary me-1">@tag</span>
+        }
+      </div>
+    }
 
     @if (!string.IsNullOrEmpty(recipe.Notes))
     {
-      <div class="card mb-3">
+      <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">Notes</h5>
-          <p class="card-text">@recipe.Notes</p>
+          <p class="card-text" style="white-space: pre-wrap;">@recipe.Notes</p>
         </div>
       </div>
     }
 
     <div class="row">
-      <div class="col-md-6">
-        <div class="card mb-3">
-          <div class="card-header">
-            <h5>Ingredients (@recipe.Ingredients.Count)</h5>
+      <div class="col-lg-5 mb-4">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Ingredients</h5>
+            <span class="badge bg-primary">@recipe.Ingredients.Count</span>
           </div>
           <div class="card-body">
             @if (recipe.Ingredients.Count == 0)
             {
-              <p><em>No ingredients found.</em></p>
+              <p class="text-muted"><em>No ingredients found.</em></p>
             }
             else
             {
               <ul class="list-group list-group-flush">
                 @foreach (var ingredient in recipe.Ingredients)
                 {
-                  <li class="list-group-item">
+                  <li class="list-group-item px-0">
+                    @if (!string.IsNullOrEmpty(ingredient.Quantity) || !string.IsNullOrEmpty(ingredient.Unit))
+                    {
+                      <span class="badge bg-light text-dark me-2">
+                        @ingredient.Quantity @ingredient.Unit
+                      </span>
+                    }
                     @if (!string.IsNullOrEmpty(ingredient.Name))
                     {
-                      <strong>@ingredient.Name</strong>
-                      @if (!string.IsNullOrEmpty(ingredient.Quantity) || !string.IsNullOrEmpty(ingredient.Unit))
-                      {
-                        <span> — @ingredient.Quantity @ingredient.Unit</span>
-                      }
+                      <span>@ingredient.Name</span>
                     }
                     else
                     {
-                      <em>@ingredient.RawText</em>
+                      <span class="text-muted">@ingredient.RawText</span>
                     }
                   </li>
                 }
@@ -65,22 +116,23 @@
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="card mb-3">
-          <div class="card-header">
-            <h5>Steps (@recipe.Steps.Count)</h5>
+      <div class="col-lg-7 mb-4">
+        <div class="card h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Instructions</h5>
+            <span class="badge bg-primary">@recipe.Steps.Count steps</span>
           </div>
           <div class="card-body">
             @if (recipe.Steps.Count == 0)
             {
-              <p><em>No steps found.</em></p>
+              <p class="text-muted"><em>No steps found.</em></p>
             }
             else
             {
-              <ol>
+              <ol class="list-group list-group-numbered list-group-flush">
                 @foreach (var step in recipe.Steps.OrderBy(s => s.Ordinal))
                 {
-                  <li>@step.Text</li>
+                  <li class="list-group-item" style="white-space: pre-wrap;">@step.Text</li>
                 }
               </ol>
             }
@@ -89,22 +141,90 @@
       </div>
     </div>
 
-    @if (recipe.Tags.Count > 0)
+    @if (recipe.ImageIds != null && recipe.ImageIds.Count > 0)
     {
-      <div class="card mb-3">
-        <div class="card-header">
-          <h5>Tags</h5>
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Original Images</h5>
+          <span class="badge bg-primary">@recipe.ImageIds.Count</span>
         </div>
         <div class="card-body">
-          @foreach (var tag in recipe.Tags)
-          {
-            <span class="badge badge-secondary mr-2">@tag</span>
-          }
+          <div class="row g-3">
+            @foreach (var imageId in recipe.ImageIds)
+            {
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="border rounded overflow-hidden position-relative" style="aspect-ratio: 1;">
+                  <img src="/api/images/@imageId" 
+                       alt="Recipe image" 
+                       class="w-100 h-100" 
+                       style="object-fit: cover; cursor: pointer;"
+                       @onclick="() => ShowImageModal(imageId)"
+                       onerror="this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center h-100 bg-light text-muted\'>Image unavailable</div>'" />
+                </div>
+              </div>
+            }
+          </div>
         </div>
       </div>
     }
   }
 </div>
+
+@* Image Modal *@
+@if (showModal && selectedImageId.HasValue)
+{
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.8);" @onclick="CloseModal">
+    <div class="modal-dialog modal-xl modal-dialog-centered" @onclick:stopPropagation>
+      <div class="modal-content bg-dark border-0">
+        <div class="modal-header border-0">
+          <button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
+        </div>
+        <div class="modal-body p-0 text-center">
+          <img src="/api/images/@selectedImageId" 
+               alt="Recipe image full size" 
+               class="img-fluid"
+               style="max-height: 80vh;" />
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@* Delete Confirmation Modal *@
+@if (showDeleteModal)
+{
+  <div class="modal show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="CancelDelete">
+    <div class="modal-dialog modal-dialog-centered" @onclick:stopPropagation>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <span class="bi bi-exclamation-triangle me-2"></span>Confirm Delete
+          </h5>
+          <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete <strong>"@recipe?.Title"</strong>?</p>
+          <p class="text-muted small mb-0">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @onclick="CancelDelete" disabled="@isDeleting">Cancel</button>
+          <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@isDeleting">
+            @if (isDeleting)
+            {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+              <span>Deleting...</span>
+            }
+            else
+            {
+              <span class="bi bi-trash me-1"></span>
+              <span>Delete Recipe</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 @code {
   [Parameter]
@@ -112,12 +232,23 @@
 
   private RecipeDto? recipe = null;
   private bool isLoading = true;
+  private bool showModal = false;
+  private Guid? selectedImageId = null;
+  private bool showDeleteModal = false;
+  private bool isDeleting = false;
 
   protected override async Task OnInitializedAsync()
   {
+    await LoadRecipe();
+  }
+
+  private async Task LoadRecipe()
+  {
+    isLoading = true;
     try
     {
-      recipe = await Http.GetFromJsonAsync<RecipeDto>($"api/recipes/{RecipeId}");
+      var apiUrl = $"{Navigation.BaseUri}api/recipes/{RecipeId}";
+      recipe = await Http.GetFromJsonAsync<RecipeDto>(apiUrl);
     }
     catch (Exception ex)
     {
@@ -127,6 +258,77 @@
     finally
     {
       isLoading = false;
+      StateHasChanged();
     }
+  }
+
+  private void ShowImageModal(Guid imageId)
+  {
+    selectedImageId = imageId;
+    showModal = true;
+  }
+
+  private void CloseModal()
+  {
+    showModal = false;
+    selectedImageId = null;
+  }
+
+  private string GetConfidenceBadgeClass()
+  {
+    if (!recipe?.OverallConfidence.HasValue ?? true) return "badge bg-secondary";
+    
+    return recipe.OverallConfidence.Value switch
+    {
+      >= 0.8m => "badge bg-success",
+      >= 0.5m => "badge bg-warning text-dark",
+      _ => "badge bg-danger"
+    };
+  }
+
+  private void ShowDeleteConfirmation()
+  {
+    showDeleteModal = true;
+  }
+
+  private void CancelDelete()
+  {
+    showDeleteModal = false;
+  }
+
+  private async Task ConfirmDelete()
+  {
+    if (recipe == null) return;
+    
+    isDeleting = true;
+    StateHasChanged();
+    
+    try
+    {
+      var apiUrl = $"{Navigation.BaseUri}api/recipes/{RecipeId}";
+      var response = await Http.DeleteAsync(apiUrl);
+      
+      if (response.IsSuccessStatusCode)
+      {
+        Navigation.NavigateTo("/recipes");
+      }
+      else
+      {
+        Console.WriteLine($"Error deleting recipe: {response.StatusCode}");
+        isDeleting = false;
+        showDeleteModal = false;
+      }
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Error deleting recipe: {ex.Message}");
+      isDeleting = false;
+      showDeleteModal = false;
+    }
+  }
+
+  private async Task PrintRecipe()
+  {
+    await JS.InvokeVoidAsync("window.print");
   }
 }

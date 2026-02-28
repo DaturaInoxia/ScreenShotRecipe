@@ -23,8 +23,10 @@ cd /d "%~dp0..\src\ScreenShotRecipe.Web"
 
 echo [2/2] Starting ScreenShotRecipe.Web...
 echo   Path: !cd!
+echo   Environment: Development
 echo.
 
+set ASPNETCORE_ENVIRONMENT=Development
 dotnet run
 
 echo.

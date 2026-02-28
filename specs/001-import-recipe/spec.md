@@ -67,8 +67,8 @@ As a user, after import I want to edit parsed fields (fix ingredient amounts, re
 ### Functional Requirements
 
 - **FR-001**: System MUST accept multi-file image uploads in one import action and preserve original upload order unless user reorders before submission.
-- **FR-002**: System MUST send each image to the configured OCR provider (Azure Vision) and collect structured OCR outputs with confidence metadata.
-- **FR-003**: System MUST concatenate OCR outputs in the final ordering and supply the combined text to an LLM parsing service via an abstract parsing interface.
+- **FR-002**: System MUST send images to the configured extraction provider (Azure OpenAI GPT-4o multimodal) and receive structured recipe data with confidence metadata.
+- **FR-003**: System MUST process all uploaded images together via the multimodal extraction service, which combines OCR and semantic parsing in a single API call.
 - **FR-004**: System MUST persist the parsed recipe (title, ingredients, steps, tags, notes) and keep a referential link to the original image files and the ImportJob record.
 - **FR-005**: System MUST present parsed recipes in the Blazor Server UI and via Minimal API endpoints for search and retrieval.
 - **FR-006**: All external services (OCR, LLM, storage, DB) MUST be injected via DI and replaceable with alternative implementations.
@@ -105,8 +105,8 @@ As a user, after import I want to edit parsed fields (fix ingredient amounts, re
 
 ## Assumptions
 
-- Primary OCR provider is Azure Vision; alternate OCR providers will be supported via the same abstraction.
-- LLM provider is configurable and invoked through a parsing interface that returns structured JSON.
+- Primary extraction provider is Azure OpenAI GPT-4o multimodal, which combines OCR and parsing in a single API call.
+- Extraction provider is configurable and invoked through an abstraction interface (`IRecipeExtractionService`) that returns structured recipe data.
 - The application will run in single-tenant or family-shared mode; user authentication is out of scope for MVP but should be pluggable.
 - Typical recipe imports consist of 1–6 images; very large imports (>10 images) are supported but may be slower.
 

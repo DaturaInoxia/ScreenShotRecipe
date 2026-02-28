@@ -77,3 +77,121 @@ main {
         position: relative;
     }
 }
+
+/* Print-only content (hidden on screen) */
+.print-only {
+    display: none !important;
+}
+
+/* Print styles for clean recipe output */
+@media print {
+    /* Hide navigation and app chrome */
+    .sidebar,
+    .top-row,
+    .no-print,
+    .modal,
+    .btn,
+    button,
+    a.btn {
+        display: none !important;
+    }
+
+    /* Show print-only content */
+    .print-only {
+        display: block !important;
+    }
+
+    /* Reset page layout for print */
+    .page {
+        display: block !important;
+        height: auto !important;
+    }
+
+    main {
+        display: block !important;
+    }
+
+    .content {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    body, html {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* Print title styling */
+    .print-title {
+        font-size: 24pt;
+        font-weight: bold;
+        margin-bottom: 0.5em;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.25em;
+    }
+
+    /* Card styling for print */
+    .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 1rem !important;
+    }
+
+    .card-header {
+        background-color: #f5f5f5 !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    /* List styling */
+    .list-group-item {
+        border: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .list-group-numbered > li::before {
+        font-weight: bold;
+    }
+
+    /* Badge styling for print */
+    .badge {
+        border: 1px solid #666 !important;
+        color: #333 !important;
+        background-color: #eee !important;
+    }
+
+    /* Hide image section in print (optional - can be removed if want images) */
+    .col-6.col-md-4.col-lg-3 {
+        display: none !important;
+    }
+
+    /* Ensure ingredients and steps are side by side */
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+
+    .col-lg-5, .col-lg-7 {
+        flex: 0 0 auto !important;
+    }
+
+    .col-lg-5 {
+        width: 40% !important;
+    }
+
+    .col-lg-7 {
+        width: 60% !important;
+    }
+
+    /* Typography for print */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+
+    p, li {
+        orphans: 3;
+        widows: 3;
+    }
+}

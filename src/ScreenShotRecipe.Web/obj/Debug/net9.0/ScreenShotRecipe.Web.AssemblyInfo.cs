@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("screenshotrecipe-web-secrets")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScreenShotRecipe.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8abb81e772b062b26a837b8d7e9b60ddced13074")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bc7735637ca4c38855dbaa8c4d82762c15ff2d2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScreenShotRecipe.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScreenShotRecipe.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

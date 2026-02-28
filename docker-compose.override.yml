@@ -6,3 +6,14 @@ services:
       - ./data:/data
     ports:
       - "8080:80"
+    environment:
+      # Set to "true" to use real GPT-4o extraction
+      - EXTRACTION_USE_REAL=false
+      # Azure OpenAI credentials (read from .env file or set directly)
+      - AzureOpenAI__Endpoint=${AZURE_OPENAI_ENDPOINT:-}
+      - AzureOpenAI__ApiKey=${AZURE_OPENAI_APIKEY:-}
+      - AzureOpenAI__DeploymentName=${AZURE_OPENAI_DEPLOYMENT:-gpt-4o}
+      # Or use direct OpenAI API
+      - AzureOpenAI__OpenAIApiKey=${OPENAI_API_KEY:-}
+    env_file:
+      - .env

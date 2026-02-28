@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-02-22
 
 ## Active Technologies
+- .NET 9.0 (001-import-recipe)
+- SQLite (app.db) + local filesystem (images/) (001-import-recipe)
 
 - .NET 9 (001-import-recipe)
 
@@ -23,6 +25,7 @@ tests/
 .NET 9: Follow standard conventions
 
 ## Recent Changes
+- 001-import-recipe: Added .NET 9.0
 
 - 001-import-recipe: Added .NET 9
 

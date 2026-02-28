@@ -4,8 +4,8 @@ Sync Impact Report
 - Version change: UNKNOWN -> 1.0.0
 - Modified principles:
 	- (new) Reliability First -> Reliability First (defined)
-	- (new) Accurate Cloud OCR (Azure Vision)
-	- (new) Pluggable LLM Parsing
+	- (new) GPT-4o Multimodal Extraction
+	- (new) Pluggable Extraction Interface
 	- (new) Clean Architecture (.NET 9 multi-project)
 	- (new) Separation of Concerns: Domain/Application/Application.Contracts/Infrastructure/Web
 	- (new) Service-based Use Cases & DI/IoC
@@ -31,8 +31,8 @@ Sync Impact Report
 ### 1. Reliability First (NON-NEGOTIABLE)
 All user-facing features and background processing MUST be designed for reliability. Systems must be resilient to transient failures, include retry policies with exponential backoff, clear idempotency semantics for repeated operations, and observable health checks. Rationale: The application processes user screenshots and text extraction; correctness and uptime are critical.
 
-### 2. Accurate Cloud OCR (Azure Vision) as Primary OCR Engine
-Official production OCR MUST use Azure Cognitive Services (Vision OCR) for document/image text extraction. Integration MUST validate results using confidence thresholds and structured result checks; OCR failures or low-confidence results MUST trigger fallback flows and clear diagnostics. Rationale: Azure Vision offers enterprise-grade accuracy and maintainability for this project.
+### 2. GPT-4o Multimodal Extraction as Primary Engine
+Official production OCR and parsing MUST use Azure OpenAI GPT-4o multimodal vision API for combined image text extraction and structured recipe parsing. Integration MUST validate results using confidence thresholds and structured result checks; extraction failures or low-confidence results MUST trigger retry flows and clear diagnostics. Rationale: GPT-4o multimodal provides superior accuracy by combining OCR and semantic parsing in a single API call, eliminating separate LLM parsing step.
 
 ### 3. Pluggable LLM-Based Parsing (Provider-Replaceable)
 LLM parsing logic (transforming raw OCR output into structured domain entities) MUST be implemented behind an abstraction that allows swapping providers. Providers MUST be replaceable via configuration and DI. The parsing interface MUST be deterministic when given identical inputs and include explicit contracts for retries, timeouts, and error classification. Rationale: Enables experimentation and risk mitigation across LLM vendors.
@@ -59,7 +59,7 @@ By default, images and derived artifacts (thumbnails, OCR cache) MUST be stored 
 The recommended deployment model is containerized via Docker, running inside an LXC container on Proxmox for simple self-hosting. The repository MUST include a minimal Dockerfile and a docker-compose override for local/Proxmox deployment. Rationale: Low-cost, reproducible self-hosting for users/operators.
 
 ### 11. Testability & CI Requirements
-All code MUST be unit-testable. `Domain` and `Application` layers MUST have unit tests covering business rules. Integration tests MUST cover OCR integration (using mocked Azure Vision contracts) and end-to-end parsing flows. CI MUST run tests and the Constitution Check (see Plan template) on PRs. Rationale: Prevent regressions and ensure correctness.
+All code MUST be unit-testable. `Domain` and `Application` layers MUST have unit tests covering business rules. Integration tests MUST cover extraction integration (using mocked GPT-4o contracts) and end-to-end parsing flows. CI MUST run tests and the Constitution Check (see Plan template) on PRs. Rationale: Prevent regressions and ensure correctness.
 
 ### 12. Maintainability & Extensibility
 Code MUST favor readability and small modules. Public interfaces and contracts MUST be versioned. Backwards-incompatible changes to `Application.Contracts` or public APIs MUST result in a MAJOR version bump and a documented migration plan. Rationale: Ensures long-term evolution without surprising consumers.
@@ -69,8 +69,7 @@ Code MUST favor readability and small modules. Public interfaces and contracts M
 - Language/Runtime: .NET 9
 - Primary UI: Blazor Server
 - API: Minimal APIs
-- OCR: Azure Cognitive Services (Vision) (primary)
-- LLM: Provider-agnostic via abstraction (configurable)
+- Extraction: Azure OpenAI GPT-4o multimodal (combined OCR + parsing)
 - DB: SQLite (default) with swappable provider implementations
 - Storage: Local filesystem (default) with swappable provider interface
 - Containerization: Docker (required for deployment artifacts)

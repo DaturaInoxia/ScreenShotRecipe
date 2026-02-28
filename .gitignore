@@ -1,0 +1,62 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# User secrets (never commit)
+secrets.json
+
+# Environment files with secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+# Keep the example file
+!.env.example
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+# Application data
+data/
+
+# Test results
+TestResults/
+*.trx
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -9,23 +9,43 @@ namespace ScreenShotRecipe.Infrastructure.Config
         public const string SectionName = "ServiceImplementation";
 
         /// <summary>
+        /// If true, use real GPT-4o multimodal extraction service.
+        /// If false, use fake extraction service (default for testing).
+        /// </summary>
+        public bool UseRealExtractionService { get; set; } = false;
+
+        /// <summary>
         /// If true, use real external services (GPT-4o for OCR, etc.).
         /// If false, use fake/mock implementations (default for testing).
+        /// DEPRECATED: Use UseRealExtractionService instead for unified extraction.
         /// </summary>
         public bool UseRealOcr { get; set; } = false;
 
         /// <summary>
         /// If true, use real LLM parser (Azure OpenAI, GPT-4o, etc.).
         /// If false, use fake parser that parses OCR text deterministically.
+        /// DEPRECATED: Use UseRealExtractionService instead for unified extraction.
         /// </summary>
         public bool UseRealLlmParser { get; set; } = false;
 
         /// <summary>
-        /// Override confidence level for fake LLM parser (1-100, null = auto-calculate).
-        /// Useful for testing different parsing quality scenarios.
+        /// Override confidence level for fake extraction service (1-100, null = auto-calculate).
+        /// Useful for testing different extraction quality scenarios.
         /// Example: 75 = return recipes with 75% confidence
         /// </summary>
+        public int? FakeExtractionConfidenceOverride { get; set; }
+
+        /// <summary>
+        /// Override confidence level for fake LLM parser (1-100, null = auto-calculate).
+        /// DEPRECATED: Use FakeExtractionConfidenceOverride instead.
+        /// </summary>
         public int? FakeLLMParserConfidenceOverride { get; set; }
+
+        /// <summary>
+        /// Environment variable override for UseRealExtractionService.
+        /// Example: "EXTRACTION_USE_REAL=true"
+        /// </summary>
+        public bool? EnvironmentOverrideUseRealExtraction { get; set; }
 
         /// <summary>
         /// Environment variable override for UseRealOcr (format: upper-case with underscores).
@@ -46,6 +66,12 @@ namespace ScreenShotRecipe.Infrastructure.Config
         {
             errors = new();
 
+            if (FakeExtractionConfidenceOverride.HasValue)
+            {
+                if (FakeExtractionConfidenceOverride < 1 || FakeExtractionConfidenceOverride > 100)
+                    errors.Add("FakeExtractionConfidenceOverride must be between 1 and 100.");
+            }
+
             if (FakeLLMParserConfidenceOverride.HasValue)
             {
                 if (FakeLLMParserConfidenceOverride < 1 || FakeLLMParserConfidenceOverride > 100)
@@ -60,6 +86,12 @@ namespace ScreenShotRecipe.Infrastructure.Config
         /// </summary>
         public void ApplyEnvironmentOverrides()
         {
+            // Check for EXTRACTION_USE_REAL environment variable
+            if (bool.TryParse(Environment.GetEnvironmentVariable("EXTRACTION_USE_REAL"), out var extractionReal))
+            {
+                UseRealExtractionService = extractionReal;
+            }
+
             // Check for OCR_USE_REAL environment variable
             if (bool.TryParse(Environment.GetEnvironmentVariable("OCR_USE_REAL"), out var ocrReal))
             {
@@ -70,6 +102,15 @@ namespace ScreenShotRecipe.Infrastructure.Config
             if (bool.TryParse(Environment.GetEnvironmentVariable("PARSER_USE_REAL"), out var parserReal))
             {
                 UseRealLlmParser = parserReal;
+            }
+
+            // Check for EXTRACTION_CONFIDENCE_OVERRIDE environment variable
+            if (int.TryParse(Environment.GetEnvironmentVariable("EXTRACTION_CONFIDENCE_OVERRIDE"), out var extractionConfidence))
+            {
+                if (extractionConfidence >= 1 && extractionConfidence <= 100)
+                {
+                    FakeExtractionConfidenceOverride = extractionConfidence;
+                }
             }
 
             // Check for PARSER_CONFIDENCE_OVERRIDE environment variable

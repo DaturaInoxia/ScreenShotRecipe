@@ -14,7 +14,7 @@ namespace ScreenShotRecipe.Domain.Interfaces;
 
 /// <summary>
 /// Multimodal OCR service for recipe image text extraction.
-/// Implementations (e.g., GPT-4o, Azure Vision) are provided by the Infrastructure layer.
+/// Implementations (e.g., GPT-4o multimodal) are provided by the Infrastructure layer.
 /// </summary>
 public interface IRecipeOcrService
 {
