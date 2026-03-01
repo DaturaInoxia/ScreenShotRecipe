@@ -15,42 +15,98 @@
       <span class="bi bi-arrow-left me-1"></span>Back to Recipes
     </a>
   </div>
-  <p>Select 1-6 image files (screenshots or photos of your recipe) and click Import.<b>Will only do one recipe at a time.</b></p>
+  <p>Select 1-6 image files (screenshots or photos of your recipe) and click Import. <b>Will only do one recipe at a time.</b></p>
 
   <div class="form-group mb-3">
-    <label for="fileInput">Select Images:</label>
-    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="HandleFileSelected" />
+    <label for="fileInput">Select Images (you can add more files by selecting again):</label>
+    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="HandleFileSelected" disabled="@isLoadingFiles" />
   </div>
 
+  @* File loading progress *@
+  @if (isLoadingFiles)
+  {
+    <div class="alert alert-info d-flex align-items-center mb-3">
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      <span>Loading files... @filesLoadedCount of @filesToLoadCount</span>
+      <div class="progress ms-3 flex-grow-1" style="height: 8px;">
+        <div class="progress-bar" role="progressbar" style="width: @GetLoadingProgress()%" aria-valuenow="@filesLoadedCount" aria-valuemin="0" aria-valuemax="@filesToLoadCount"></div>
+      </div>
+    </div>
+  }
+
+  @* Selected files list *@
+  @if (selectedFiles.Count > 0)
+  {
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <strong>Ready to Import:</strong> @selectedFiles.Count file(s)
+          @if (selectedFiles.Count >= 6)
+          {
+            <span class="badge bg-warning ms-2">Maximum reached</span>
+          }
+        </span>
+        <button class="btn btn-sm btn-outline-danger" @onclick="ClearAllFiles" disabled="@(isLoading || isLoadingFiles)">
+          Clear All
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-2">
+          @foreach (var file in selectedFiles)
+          {
+            <div class="col">
+              <div class="border rounded p-2 position-relative" style="min-height: 120px;">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-1" 
+                        style="font-size: 0.6rem; padding: 4px;"
+                        @onclick="() => RemoveFile(file.FileName)" 
+                        disabled="@(isLoading || isLoadingFiles)"
+                        title="Remove this file"></button>
+                @if (file.PreviewUrl != null)
+                {
+                  <img src="@file.PreviewUrl" alt="@file.FileName" class="img-fluid rounded mb-1" style="max-height: 80px; object-fit: contain; width: 100%;" />
+                }
+                else
+                {
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center mb-1" style="height: 80px;">
+                    <span class="text-muted small">Preview</span>
+                  </div>
+                }
+                <div class="small text-truncate" title="@file.FileName">@file.FileName</div>
+                <div class="small text-muted">@FormatFileSize(file.Bytes.Length)</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
   <div class="form-group mb-3">
-    <button class="btn btn-primary" @onclick="HandleImport" disabled="@isLoading">
+    <button class="btn btn-primary btn-lg" @onclick="HandleImport" disabled="@(!CanImport)">
       @if (isLoading)
       {
         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
         @importStatus
       }
+      else if (isLoadingFiles)
+      {
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Loading files...</span>
+      }
+      else if (selectedFiles.Count == 0)
+      {
+        <span>Select images to import</span>
+      }
       else
       {
-        <span>Import Recipe</span>
+        <span>Import Recipe (@selectedFiles.Count image@(selectedFiles.Count > 1 ? "s" : ""))</span>
       }
     </button>
+    @if (!CanImport && !isLoading && !isLoadingFiles && selectedFiles.Count == 0)
+    {
+      <small class="text-muted ms-2">Select at least one image to enable import</small>
+    }
   </div>
-
-  @if (selectedFiles.Count > 0)
-  {
-    <div class="mb-3">
-      <p class="text-muted">Selected files: @selectedFiles.Count / 6</p>
-      <div class="d-flex flex-wrap gap-2">
-        @foreach (var file in selectedFiles.Take(6))
-        {
-          <div class="border rounded p-2 small">
-            <span>@file.FileName</span>
-            <span class="text-muted ms-1">(@FormatFileSize(file.Bytes.Length))</span>
-          </div>
-        }
-      </div>
-    </div>
-  }
 
   @if (!string.IsNullOrEmpty(message))
   {
@@ -168,34 +224,82 @@
 </div>
 
 @code {
-  private List<(byte[] Bytes, string FileName)> selectedFiles = new();
+  private record SelectedFile(byte[] Bytes, string FileName, string? PreviewUrl);
+  
+  private List<SelectedFile> selectedFiles = new();
   private bool isLoading = false;
+  private bool isLoadingFiles = false;
+  private int filesLoadedCount = 0;
+  private int filesToLoadCount = 0;
   private string message = string.Empty;
   private string importStatus = "Importing...";
   private bool isError = false;
   private RecipeImportResponseDto? importResponse = null;
 
+  private bool CanImport => selectedFiles.Count > 0 && !isLoading && !isLoadingFiles;
+
+  private int GetLoadingProgress()
+  {
+    if (filesToLoadCount == 0) return 0;
+    return (int)((double)filesLoadedCount / filesToLoadCount * 100);
+  }
+
   private async Task HandleFileSelected(InputFileChangeEventArgs e)
   {
-    selectedFiles.Clear();
     message = string.Empty;
     isError = false;
     importResponse = null;
 
+    var files = e.GetMultipleFiles();
+    var remainingSlots = 6 - selectedFiles.Count;
+    
+    if (remainingSlots <= 0)
+    {
+      message = "Maximum 6 files allowed. Remove some files to add more.";
+      isError = true;
+      StateHasChanged();
+      return;
+    }
+
+    var filesToProcess = files.Take(remainingSlots).ToList();
+    filesToLoadCount = filesToProcess.Count;
+    filesLoadedCount = 0;
+    isLoadingFiles = true;
+    StateHasChanged();
+
     try
     {
-      var fileCount = Math.Min(e.GetMultipleFiles().Count, 6);
-      foreach (var file in e.GetMultipleFiles().Take(6))
+      foreach (var file in filesToProcess)
       {
+        // Check for duplicate filenames
+        if (selectedFiles.Any(f => f.FileName == file.Name))
+        {
+          filesLoadedCount++;
+          StateHasChanged();
+          continue;
+        }
+
         using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000);
         using var ms = new System.IO.MemoryStream();
         await stream.CopyToAsync(ms);
-        selectedFiles.Add((ms.ToArray(), file.Name));
+        var bytes = ms.ToArray();
+        
+        // Create preview URL
+        var base64 = Convert.ToBase64String(bytes);
+        var mimeType = GetMimeType(file.Name);
+        var previewUrl = $"data:{mimeType};base64,{base64}";
+        
+        selectedFiles.Add(new SelectedFile(bytes, file.Name, previewUrl));
+        filesLoadedCount++;
+        StateHasChanged();
+        
+        // Small delay to show progress smoothly
+        await Task.Delay(50);
       }
       
-      if (e.GetMultipleFiles().Count > 6)
+      if (files.Count > remainingSlots)
       {
-        message = $"Selected {selectedFiles.Count} files (limited to 6 maximum)";
+        message = $"Added {filesToProcess.Count} files. {files.Count - remainingSlots} file(s) skipped (maximum 6).";
         isError = false;
       }
     }
@@ -203,9 +307,43 @@
     {
       message = $"Error loading files: {ex.Message}";
       isError = true;
-      selectedFiles.Clear();
     }
+    finally
+    {
+      isLoadingFiles = false;
+      filesLoadedCount = 0;
+      filesToLoadCount = 0;
+      StateHasChanged();
+    }
+  }
+
+  private void RemoveFile(string fileName)
+  {
+    selectedFiles.RemoveAll(f => f.FileName == fileName);
     StateHasChanged();
+  }
+
+  private void ClearAllFiles()
+  {
+    selectedFiles.Clear();
+    message = string.Empty;
+    isError = false;
+    importResponse = null;
+    StateHasChanged();
+  }
+
+  private static string GetMimeType(string fileName)
+  {
+    var ext = Path.GetExtension(fileName).ToLowerInvariant();
+    return ext switch
+    {
+      ".jpg" or ".jpeg" => "image/jpeg",
+      ".png" => "image/png",
+      ".gif" => "image/gif",
+      ".webp" => "image/webp",
+      ".bmp" => "image/bmp",
+      _ => "image/jpeg"
+    };
   }
 
   private async Task HandleImport()
@@ -228,10 +366,10 @@
     try
     {
       var form = new MultipartFormDataContent();
-      foreach (var (bytes, fileName) in selectedFiles)
+      foreach (var file in selectedFiles)
       {
-        var byteContent = new ByteArrayContent(bytes);
-        form.Add(byteContent, "files", fileName);
+        var byteContent = new ByteArrayContent(file.Bytes);
+        form.Add(byteContent, "files", file.FileName);
       }
       form.Add(new StringContent("web-upload"), "source");
 
