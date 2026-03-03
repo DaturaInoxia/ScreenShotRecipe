@@ -205,9 +205,9 @@ app.MapPost("/api/import", async (HttpRequest req, ImportService importService, 
             return Results.BadRequest("No files provided");
         }
 
-        if (files.Count > 6)
+        if (files.Count > 12)
         {
-            return Results.BadRequest("Maximum 6 images allowed per import");
+            return Results.BadRequest("Maximum 12 images allowed per import");
         }
         
         var images = new System.Collections.Generic.List<RecipeImageFileDto>();

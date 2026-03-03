@@ -8,7 +8,7 @@ namespace ScreenShotRecipe.Application.Contracts.Dtos
     public class RecipeImportRequestDto
     {
         /// <summary>
-        /// Collection of image files (1-6 images recommended).
+        /// Collection of image files (1-12 images recommended).
         /// Each file represents a page/section of the recipe.
         /// </summary>
         public required List<RecipeImageFileDto> Images { get; set; }
