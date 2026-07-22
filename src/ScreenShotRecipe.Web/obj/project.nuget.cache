@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "MCwYZEV/Jv0=",
+  "dgSpecHash": "BAIbdG0wUvY=",
   "success": true,
   "projectFilePath": "D:\\src\\ScreenShotRecipe\\src\\ScreenShotRecipe.Web\\ScreenShotRecipe.Web.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\kenac\\.nuget\\packages\\htmlagilitypack\\1.12.4\\htmlagilitypack.1.12.4.nupkg.sha512",
     "C:\\Users\\kenac\\.nuget\\packages\\microsoft.aspnetcore.authorization\\9.0.0-rc.1.24452.1\\microsoft.aspnetcore.authorization.9.0.0-rc.1.24452.1.nupkg.sha512",
     "C:\\Users\\kenac\\.nuget\\packages\\microsoft.aspnetcore.components\\9.0.0-rc.1.24452.1\\microsoft.aspnetcore.components.9.0.0-rc.1.24452.1.nupkg.sha512",
     "C:\\Users\\kenac\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\9.0.0-rc.1.24452.1\\microsoft.aspnetcore.components.analyzers.9.0.0-rc.1.24452.1.nupkg.sha512",

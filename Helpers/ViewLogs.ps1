@@ -9,7 +9,7 @@ param(
 # ============================================
 # CONFIGURATION - Edit these values as needed
 # ============================================
-$Server = "192.168.0.18"
+$Server = "192.168.0.27"
 $User = "root"
 $RemotePath = "/opt/ScreenShotRecipe"
 # ============================================

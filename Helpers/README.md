@@ -90,7 +90,7 @@ Full deployment script with options for deploying to Proxmox.
 .\Helpers\Deploy.ps1
 
 # With custom server settings
-.\Helpers\Deploy.ps1 -Server 192.168.0.18 -User root
+.\Helpers\Deploy.ps1 -Server 192.168.0.27 -User root
 
 # Skip build (just restart container)
 .\Helpers\Deploy.ps1 -SkipBuild

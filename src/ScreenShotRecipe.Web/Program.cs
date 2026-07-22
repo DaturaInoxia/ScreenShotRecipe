@@ -147,6 +147,16 @@ else
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddHttpClient();
 
+// Register URL recipe extractor
+builder.Services.AddHttpClient<IUrlRecipeExtractor, UrlRecipeExtractor>()
+    .ConfigureHttpClient(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(30);
+        client.DefaultRequestHeaders.Add("User-Agent", 
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+    });
+Log.Information("URL recipe extractor registered");
+
 builder.Services.AddAntiforgery();
 
 builder.Services.AddRazorComponents()
@@ -246,6 +256,38 @@ app.MapPost("/api/import", async (HttpRequest req, ImportService importService, 
     catch (Exception ex)
     {
         logger.LogError(ex, "Error processing import request");
+        return Results.BadRequest(new RecipeImportResponseDto
+        {
+            ImportJobId = Guid.Empty,
+            Status = "Failed",
+            ErrorMessage = ex.Message
+        });
+    }
+});
+
+// URL import endpoint
+app.MapPost("/api/import/url", async (HttpRequest req, ImportService importService, ILogger<Program> logger) =>
+{
+    try
+    {
+        var body = await req.ReadFromJsonAsync<UrlImportRequest>();
+        if (body == null || string.IsNullOrWhiteSpace(body.Url))
+        {
+            return Results.BadRequest(new { error = "URL is required" });
+        }
+
+        logger.LogInformation("URL import request received: {Url}", body.Url);
+
+        var response = await importService.ImportFromUrlAsync(body.Url, body.IdempotencyKey);
+        logger.LogInformation("URL import completed. JobId: {JobId}, Status: {Status}", response.ImportJobId, response.Status);
+        
+        return response.Status == "Failed" 
+            ? Results.BadRequest(response) 
+            : Results.Ok(response);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error processing URL import request");
         return Results.BadRequest(new RecipeImportResponseDto
         {
             ImportJobId = Guid.Empty,
@@ -535,3 +577,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+// Request DTOs for minimal APIs
+record UrlImportRequest(string Url, string? IdempotencyKey = null);

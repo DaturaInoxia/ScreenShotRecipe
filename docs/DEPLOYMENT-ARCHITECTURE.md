@@ -162,14 +162,24 @@ Scripts are located in `Helpers/` directory:
 | `QuickDeploy.ps1` | Simple deploy (edit config inside) |
 | `ViewLogs.ps1` | View Docker container logs |
 
+### Server Information
+
+| Setting | Value |
+|---------|-------|
+| Server IP | `192.168.0.27` |
+| Hostname | `my-docker-apps` |
+| User | `root` |
+| Remote Path | `/opt/ScreenShotRecipe` |
+| App URL | `http://192.168.0.27:8080` |
+
 ### Initial Setup (First Time Only)
 
 ```powershell
 # 1. Copy source to server
-scp -r D:\src\ScreenShotRecipe root@192.168.0.18:/opt/
+scp -r D:\src\ScreenShotRecipe root@192.168.0.27:/opt/
 
 # 2. SSH to server and create .env file
-ssh root@192.168.0.18
+ssh root@192.168.0.27
 cd /opt/ScreenShotRecipe
 cp .env.example .env
 nano .env  # Fill in Azure credentials, set EXTRACTION_USE_REAL=true
@@ -185,7 +195,7 @@ docker compose up -d --build
 .\Helpers\QuickDeploy.ps1
 
 # Or with more options
-.\Helpers\Deploy.ps1 -Server 192.168.0.18 -User root
+.\Helpers\Deploy.ps1 -Server 192.168.0.27 -User root
 ```
 
 ### Useful Commands

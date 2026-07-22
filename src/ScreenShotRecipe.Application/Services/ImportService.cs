@@ -11,12 +11,13 @@ using Microsoft.Extensions.Logging;
 namespace ScreenShotRecipe.Application.Services
 {
     /// <summary>
-    /// Service responsible for importing recipes from multiple images.
+    /// Service responsible for importing recipes from multiple images or URLs.
     /// Creates ImportJob, processes images, invokes extraction, and persists results.
     /// </summary>
     public class ImportService
     {
         private readonly IRecipeExtractionService _extractionService;
+        private readonly IUrlRecipeExtractor? _urlExtractor;
         private readonly IStorage _storage;
         private readonly IRecipeRepository _recipeRepo;
         private readonly IImageAssetRepository _imageAssetRepo;
@@ -35,9 +36,11 @@ namespace ScreenShotRecipe.Application.Services
             IImageAssetRepository imageAssetRepo,
             IImportJobRepository importJobRepo,
             IImagePreprocessor imagePreprocessor,
-            ILogger<ImportService> logger)
+            ILogger<ImportService> logger,
+            IUrlRecipeExtractor? urlExtractor = null)
         {
             _extractionService = extractionService;
+            _urlExtractor = urlExtractor;
             _storage = storage;
             _recipeRepo = recipeRepo;
             _imageAssetRepo = imageAssetRepo;
@@ -407,6 +410,138 @@ namespace ScreenShotRecipe.Application.Services
                 }).ToList(),
                 Tags = recipe.Tags
             };
+        }
+
+        /// <summary>
+        /// Import recipe from a URL.
+        /// Parses structured data (JSON-LD) or HTML content from the page.
+        /// </summary>
+        public async Task<RecipeImportResponseDto> ImportFromUrlAsync(
+            string url,
+            string? idempotencyKey = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (_urlExtractor == null)
+            {
+                throw new InvalidOperationException("URL extraction is not configured");
+            }
+
+            // Check idempotency - return existing job if found
+            if (!string.IsNullOrEmpty(idempotencyKey))
+            {
+                var existingJob = await _importJobRepo.GetByIdempotencyKeyAsync(idempotencyKey, cancellationToken);
+                if (existingJob != null)
+                {
+                    _logger.LogInformation("Found existing ImportJob {JobId} for idempotency key {Key}", 
+                        existingJob.Id, idempotencyKey);
+                    return MapToResponse(existingJob);
+                }
+            }
+
+            // Create import job in Queued state
+            var importJob = new ImportJob
+            {
+                Id = Guid.NewGuid(),
+                Status = ImportJobStatus.Queued,
+                CreatedAt = DateTime.UtcNow,
+                Source = "url-import",
+                IdempotencyKey = idempotencyKey,
+                Version = 1
+            };
+
+            await _importJobRepo.AddAsync(importJob, cancellationToken);
+            _logger.LogInformation("Created ImportJob {JobId} for URL import: {Url}", importJob.Id, url);
+
+            try
+            {
+                // Update status to OcrInProgress (parsing the URL)
+                await _importJobRepo.UpdateStatusAsync(importJob.Id, ImportJobStatus.OcrInProgress, cancellationToken: cancellationToken);
+
+                // Extract recipe from URL
+                RecipeExtractionResult extractionResult;
+                try
+                {
+                    extractionResult = await _urlExtractor.ExtractFromUrlAsync(url, cancellationToken);
+                }
+                catch (RecipeExtractionException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to extract recipe from URL: {Url}", url);
+                    
+                    await _importJobRepo.UpdateStatusAsync(
+                        importJob.Id, 
+                        ImportJobStatus.Failed, 
+                        ex.Message,
+                        $"URL extraction failed: {ex.Message}",
+                        cancellationToken);
+
+                    return new RecipeImportResponseDto
+                    {
+                        ImportJobId = importJob.Id,
+                        Status = ImportJobStatus.Failed.ToString(),
+                        ErrorMessage = ex.Message,
+                        Diagnostics = $"Failed to extract recipe from URL"
+                    };
+                }
+
+                // Update status to ParsingInProgress
+                await _importJobRepo.UpdateStatusAsync(importJob.Id, ImportJobStatus.ParsingInProgress, cancellationToken: cancellationToken);
+
+                _logger.LogInformation(
+                    "URL recipe extraction completed. Title: {Title}, Confidence: {Confidence:P0}, " +
+                    "Ingredients: {IngredientCount}, Steps: {StepCount}, Duration: {Duration}ms",
+                    extractionResult.Recipe.Title,
+                    extractionResult.Confidence,
+                    extractionResult.Recipe.Ingredients.Count,
+                    extractionResult.Recipe.Steps.Count,
+                    extractionResult.ProcessingTime.TotalMilliseconds);
+
+                // Set confidence metadata on recipe
+                var recipe = extractionResult.Recipe;
+                recipe.ImportJobId = importJob.Id;
+                recipe.OverallConfidence = extractionResult.Confidence;
+                recipe.ConfidenceNotes ??= BuildConfidenceNotes(extractionResult);
+                recipe.Version = 1;
+
+                // Persist recipe
+                await _recipeRepo.AddAsync(recipe);
+                _logger.LogInformation("Recipe persisted. Recipe ID: {RecipeId}, Title: {Title}", 
+                    recipe.Id, recipe.Title);
+
+                // Update ImportJob with recipe reference and mark as succeeded
+                importJob.RecipeId = recipe.Id;
+                importJob.Status = ImportJobStatus.Succeeded;
+                importJob.CompletedAt = DateTime.UtcNow;
+                importJob.Diagnostics = $"Imported from URL in {extractionResult.ProcessingTime.TotalMilliseconds:F0}ms";
+                await _importJobRepo.UpdateAsync(importJob, cancellationToken);
+
+                // Build response
+                return new RecipeImportResponseDto
+                {
+                    ImportJobId = importJob.Id,
+                    Status = ImportJobStatus.Succeeded.ToString(),
+                    Recipe = MapToRecipeDto(recipe),
+                    Diagnostics = importJob.Diagnostics
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Import job {JobId} failed unexpectedly for URL: {Url}", importJob.Id, url);
+                
+                await _importJobRepo.UpdateStatusAsync(
+                    importJob.Id, 
+                    ImportJobStatus.Failed, 
+                    ex.Message,
+                    $"Unexpected error: {ex.GetType().Name}",
+                    cancellationToken);
+
+                return new RecipeImportResponseDto
+                {
+                    ImportJobId = importJob.Id,
+                    Status = ImportJobStatus.Failed.ToString(),
+                    ErrorMessage = ex.Message,
+                    Diagnostics = $"Unexpected error: {ex.GetType().Name}: {ex.Message}"
+                };
+            }
         }
     }
 }

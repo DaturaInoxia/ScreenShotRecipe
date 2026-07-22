@@ -99,3 +99,6 @@ D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\scopedcss\Page
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\j3mr6laknr-i2voavm8f8.gz
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\oj1p7v2h9k-i2voavm8f8.gz
 D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\qh67lf9lew-59y82r3bgz.gz
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\bin\Debug\net9.0\HtmlAgilityPack.dll
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\e7n6mmq4gm-gupmxwrtzz.gz
+D:\src\ScreenShotRecipe\src\ScreenShotRecipe.Web\obj\Debug\net9.0\compressed\2a8diy1m74-nxgjj9swh2.gz

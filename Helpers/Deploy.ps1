@@ -3,7 +3,7 @@
 # Run from repository root: .\Helpers\Deploy.ps1
 
 param(
-    [string]$Server = "192.168.0.18",
+    [string]$Server = "192.168.0.27",
     [string]$User = "root",
     [string]$RemotePath = "/opt/ScreenShotRecipe",
     [switch]$SkipBuild,
@@ -81,6 +81,10 @@ Write-Host "  Source files copied." -ForegroundColor Green
 if (-not $SkipBuild) {
     Write-Host "[2/3] Building Docker container..." -ForegroundColor Yellow
     ssh "$User@$Server" "cd $RemotePath && docker compose build --no-cache"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  ERROR: Docker build failed (exit code $LASTEXITCODE)." -ForegroundColor Red
+        exit 1
+    }
     Write-Host "  Build complete." -ForegroundColor Green
 } else {
     Write-Host "[2/3] Skipping build (--SkipBuild flag set)" -ForegroundColor Yellow
@@ -88,7 +92,22 @@ if (-not $SkipBuild) {
 
 Write-Host "[3/3] Restarting container..." -ForegroundColor Yellow
 ssh "$User@$Server" "cd $RemotePath && docker compose down && docker compose up -d"
-Write-Host "  Container restarted." -ForegroundColor Green
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  ERROR: docker compose up failed (exit code $LASTEXITCODE)." -ForegroundColor Red
+    Write-Host "  Check for missing .env file or port conflicts on the server." -ForegroundColor Red
+    exit 1
+}
+Write-Host "  Container started, waiting 5 seconds to check health..." -ForegroundColor Yellow
+Start-Sleep -Seconds 5
+
+# Verify the container is still running (not crashed)
+$runningContainers = ssh "$User@$Server" "cd $RemotePath && docker compose ps --filter status=running --format '{{.Name}}'"
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runningContainers)) {
+    Write-Host "  ERROR: Container is not running after startup. Showing logs:" -ForegroundColor Red
+    ssh "$User@$Server" "cd $RemotePath && docker compose logs --tail=50"
+    exit 1
+}
+Write-Host "  Container is running." -ForegroundColor Green
 
 # Final status
 Write-Host ""

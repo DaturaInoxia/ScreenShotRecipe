@@ -10,17 +10,71 @@
 
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="mb-0">Import Recipe from Images</h1>
+    <h1 class="mb-0">Import Recipe</h1>
     <a href="/recipes" class="btn btn-outline-secondary">
       <span class="bi bi-arrow-left me-1"></span>Back to Recipes
     </a>
   </div>
-  <p>Select 1-12 image files (screenshots or photos of your recipe) and click Import. <b>Will only do one recipe at a time.</b></p>
 
-  <div class="form-group mb-3">
-    <label for="fileInput">Select Images (you can add more files by selecting again):</label>
-    <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="HandleFileSelected" disabled="@isLoadingFiles" />
-  </div>
+  @* Import method tabs *@
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button class="nav-link @(importMode == ImportMode.Images ? "active" : "")" 
+              @onclick="() => SwitchMode(ImportMode.Images)"
+              disabled="@isLoading">
+        <span class="me-1">📷</span> From Images
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link @(importMode == ImportMode.Url ? "active" : "")" 
+              @onclick="() => SwitchMode(ImportMode.Url)"
+              disabled="@isLoading">
+        <span class="me-1">🔗</span> From URL
+      </button>
+    </li>
+  </ul>
+
+  @* URL Import Section *@
+  @if (importMode == ImportMode.Url)
+  {
+    <div class="card mb-3">
+      <div class="card-body">
+        <p class="text-muted">Paste a URL to a recipe page. Works best with sites that use structured recipe data (most popular recipe sites).</p>
+        <div class="input-group">
+          <input type="url" class="form-control form-control-lg" 
+                 placeholder="https://example.com/recipe/..." 
+                 @bind="recipeUrl" 
+                 @bind:event="oninput"
+                 disabled="@isLoading" />
+          <button class="btn btn-primary btn-lg" @onclick="HandleUrlImport" disabled="@(!CanImportUrl)">
+            @if (isLoading)
+            {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              @importStatus
+            }
+            else
+            {
+              <span>Import from URL</span>
+            }
+          </button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(recipeUrl) && !IsValidUrl(recipeUrl))
+        {
+          <small class="text-danger mt-1 d-block">Please enter a valid URL starting with http:// or https://</small>
+        }
+      </div>
+    </div>
+  }
+
+  @* Image Upload Section *@
+  @if (importMode == ImportMode.Images)
+  {
+    <p>Select 1-12 image files (screenshots or photos of your recipe) and click Import. <b>Will only do one recipe at a time.</b></p>
+
+    <div class="form-group mb-3">
+      <label for="fileInput">Select Images (you can add more files by selecting again):</label>
+      <InputFile id="fileInput" class="form-control" multiple accept="image/*" OnChange="HandleFileSelected" disabled="@isLoadingFiles" />
+    </div>
 
   @* File loading progress *@
   @if (isLoadingFiles)
@@ -81,32 +135,33 @@
     </div>
   }
 
-  <div class="form-group mb-3">
-    <button class="btn btn-primary btn-lg" @onclick="HandleImport" disabled="@(!CanImport)">
-      @if (isLoading)
+    <div class="form-group mb-3">
+      <button class="btn btn-primary btn-lg" @onclick="HandleImport" disabled="@(!CanImport)">
+        @if (isLoading)
+        {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          @importStatus
+        }
+        else if (isLoadingFiles)
+        {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span>Loading files...</span>
+        }
+        else if (selectedFiles.Count == 0)
+        {
+          <span>Select images to import</span>
+        }
+        else
+        {
+          <span>Import Recipe (@selectedFiles.Count image@(selectedFiles.Count > 1 ? "s" : ""))</span>
+        }
+      </button>
+      @if (!CanImport && !isLoading && !isLoadingFiles && selectedFiles.Count == 0)
       {
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        @importStatus
+        <small class="text-muted ms-2">Select at least one image to enable import</small>
       }
-      else if (isLoadingFiles)
-      {
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        <span>Loading files...</span>
-      }
-      else if (selectedFiles.Count == 0)
-      {
-        <span>Select images to import</span>
-      }
-      else
-      {
-        <span>Import Recipe (@selectedFiles.Count image@(selectedFiles.Count > 1 ? "s" : ""))</span>
-      }
-    </button>
-    @if (!CanImport && !isLoading && !isLoadingFiles && selectedFiles.Count == 0)
-    {
-      <small class="text-muted ms-2">Select at least one image to enable import</small>
-    }
-  </div>
+    </div>
+  }
 
   @if (!string.IsNullOrEmpty(message))
   {
@@ -224,8 +279,12 @@
 </div>
 
 @code {
+  private enum ImportMode { Images, Url }
+  
   private record SelectedFile(byte[] Bytes, string FileName, string? PreviewUrl);
   
+  private ImportMode importMode = ImportMode.Images;
+  private string recipeUrl = string.Empty;
   private List<SelectedFile> selectedFiles = new();
   private bool isLoading = false;
   private bool isLoadingFiles = false;
@@ -237,6 +296,24 @@
   private RecipeImportResponseDto? importResponse = null;
 
   private bool CanImport => selectedFiles.Count > 0 && !isLoading && !isLoadingFiles;
+  private bool CanImportUrl => !string.IsNullOrWhiteSpace(recipeUrl) && IsValidUrl(recipeUrl) && !isLoading;
+
+  private bool IsValidUrl(string url)
+  {
+    if (string.IsNullOrWhiteSpace(url)) return false;
+    return Uri.TryCreate(url, UriKind.Absolute, out var uri) 
+      && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+  }
+
+  private void SwitchMode(ImportMode mode)
+  {
+    if (isLoading) return;
+    importMode = mode;
+    message = string.Empty;
+    isError = false;
+    importResponse = null;
+    StateHasChanged();
+  }
 
   private int GetLoadingProgress()
   {
@@ -420,9 +497,76 @@
     }
   }
 
+  private async Task HandleUrlImport()
+  {
+    if (string.IsNullOrWhiteSpace(recipeUrl) || !IsValidUrl(recipeUrl))
+    {
+      message = "Please enter a valid URL.";
+      isError = true;
+      StateHasChanged();
+      return;
+    }
+
+    isLoading = true;
+    importStatus = "Fetching recipe...";
+    message = string.Empty;
+    isError = false;
+    importResponse = null;
+    StateHasChanged();
+
+    try
+    {
+      importStatus = "Parsing recipe data...";
+      StateHasChanged();
+
+      var baseUri = Navigation.BaseUri;
+      var apiUrl = $"{baseUri}api/import/url";
+      Logger.LogInformation("Posting URL import to API: {ApiUrl} with URL: {RecipeUrl}", apiUrl, recipeUrl);
+      
+      var response = await Http.PostAsJsonAsync(apiUrl, new { Url = recipeUrl });
+      
+      Logger.LogInformation("API Response: {StatusCode}", response.StatusCode);
+      
+      var content = await response.Content.ReadAsStringAsync();
+      importResponse = JsonSerializer.Deserialize<RecipeImportResponseDto>(content, 
+        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+      
+      if (response.IsSuccessStatusCode && importResponse?.Recipe != null)
+      {
+        message = string.Empty;
+        isError = false;
+        recipeUrl = string.Empty;
+      }
+      else if (importResponse != null)
+      {
+        message = importResponse.ErrorMessage ?? "Import failed";
+        isError = true;
+      }
+      else
+      {
+        message = $"Import failed: {content}";
+        isError = true;
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error importing recipe from URL");
+      message = $"Error importing recipe from URL: {ex.Message}";
+      isError = true;
+      importResponse = null;
+    }
+    finally
+    {
+      isLoading = false;
+      importStatus = "Importing...";
+      StateHasChanged();
+    }
+  }
+
   private void ResetForm()
   {
     selectedFiles.Clear();
+    recipeUrl = string.Empty;
     message = string.Empty;
     isError = false;
     importResponse = null;
